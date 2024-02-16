@@ -8,7 +8,7 @@ export default function ContentWrapper() {
       <Route path="/" exact>
         <HomePage />
       </Route>
-      <Route>
+      <Route path="/shop">
         <ProductListPage />
       </Route>
     </Switch>

@@ -1,31 +1,21 @@
-import Slider from "../components/HomePage/Slider";
 import EditorsPick from "../components/HomePage/EditorsPick";
 import BestSeller from "../components/HomePage/BestSellerProducts";
 import SummerCard from "../components/HomePage/SummerCard";
 import FeaturedPosts from "../components/HomePage/FeaturedPosts";
-import SocialMediaLinks from "../components/HomePage/SocialMediaLinks";
+import { firstCarouselContent, secondCarouselContent } from "../mock/carouselContentsData"
+import CarouselComponent from "../components/HomePage/Carousel";
 
 
 export default function HomePage() {
     return (
       <>
-        <Slider />
+        <CarouselComponent items={firstCarouselContent} />
         <EditorsPick />
         <SummerCard />
         <BestSeller />
-
-        <SocialMediaLinks />
+        <CarouselComponent items={secondCarouselContent} />
         <FeaturedPosts />
       </>
     );
   }
   
-
-/* slider,
-editorspick,
-bestseller,
-slider,tekrarlandı,
-summercard,
-featuredposts,
-bandage,icon
-getintoch*/
