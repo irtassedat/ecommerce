@@ -16,7 +16,7 @@ export const secondCarouselContent = [
 ];
 export const thirdCarouselContent = [
     {
-        src: './img/product-1.svg',
+        src: './img/product-1.svg'
     },
     {
         src: './img/product-2.svg',
