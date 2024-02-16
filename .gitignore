@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+# public/img klasörünü yoksay
+public/img/
+
+# src/components/mock klasörünü yoksay
+src/mock/
+
+# package-lock.json dosyasını yoksay
+package-lock.json
+
 
 # Editor directories and files
 .vscode/*
