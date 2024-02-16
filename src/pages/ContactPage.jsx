@@ -3,7 +3,7 @@ import ContactCard from '../components/ContactPage/ContactCard'
 import { contactCardData } from '../mock/contactCardData'
 import { faInstagram, faTwitter, faLinkedin, faFacebook } from '@fortawesome/free-brands-svg-icons';
 
-export default function Contact() {
+export default function ContactPage() {
 
     return (
         <>
