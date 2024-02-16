@@ -1,6 +1,6 @@
 import { Button, ButtonGroup } from "reactstrap"
 import { bestseller } from "../../mock/bestSellerData"
-import ProductCard from "../ProductList/ProductCard"
+import ProductCard from "./ProductCard"
 
 
 export default function Products() {
