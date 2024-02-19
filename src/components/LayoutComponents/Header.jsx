@@ -43,7 +43,7 @@ export default function Header() {
                         </nav>
                     </div>
                     <div className='flex gap-5 text-sm leading-6 text-[#23A6F0]'>
-                        <a><FontAwesomeIcon icon={faRegularUser} /> Login / Register</a>
+                        <a href="/signup"><FontAwesomeIcon icon={faRegularUser} /> Login / Register</a>
                         <div><FontAwesomeIcon icon={faSolidMagnifyingGlass} /></div>
                         <div><FontAwesomeIcon icon={faSolidCartShopping} /> 1</div>
                         <div><FontAwesomeIcon icon={faRegularHeart} /> 1</div>
