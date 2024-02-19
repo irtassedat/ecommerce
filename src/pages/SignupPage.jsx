@@ -50,7 +50,7 @@ export default function SignUpForm() {
   const isStoreSelected = watch("role_id") === "2";
 
   return (
-    <div className="max-w-[1050px] mx-auto my-10 p-8 bg-white shadow-lg rounded-lg">
+    <div className="max-w-2xl mx-auto my-10 p-8 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-semibold text-center text-gray-800 mb-8">Sign Up</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="form-group">
