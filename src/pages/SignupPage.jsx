@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import instance from '../mock/axiosInstance';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRoles } from '../store/actions/globalAction';
 
 export default function SignUpForm() {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    setError,
-  } = useForm({
+  const dispatch = useDispatch();
+  const roles = useSelector(state => state.global.roles); // Redux store'dan roles dizisini çekiyoruz
+  const { register, handleSubmit, watch, formState: { errors }, setError } = useForm({
     defaultValues: {
       name: "",
       email: "",
@@ -20,30 +17,17 @@ export default function SignUpForm() {
     },
     mode: "onChange",
   });
-  const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
-    instance.get('/roles').then((response) => {
-      setRoles(response.data);
-      setError("role_id", { type: "manual", message: "" }, { shouldFocus: true });
-    });
-  }, [setError]);
+    dispatch(fetchRoles()); // Komponent yüklendiğinde rolleri çek
+  }, [dispatch,roles]);
 
+  console.log(roles);
   const onSubmit = async (data) => {
     const { confirmPassword, ...formData } = data; // confirmPassword alanını kaldır
     if(data.role_id !== "2") {
       delete formData.store; // Mağaza rolü değilse store bilgilerini sil
-    }
-
-    setLoading(true); // Yükleme durumunu başlat
-    try {
-      await instance.post('/signup', formData);
-      alert('User created. Check your email for activation instructions.');
-    } catch (error) {
-      alert(`Signup failed: ${error.response ? error.response.data.message : error.message}`);
-    } finally {
-      setLoading(false); // Yükleme durumunu sonlandır
     }
   };
 
