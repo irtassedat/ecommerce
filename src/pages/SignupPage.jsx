@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRoles } from '../store/actions/globalAction';
+import axiosInstance from '../mock/axiosInstance';
 
 export default function SignUpForm() {
   const dispatch = useDispatch();
@@ -20,16 +21,28 @@ export default function SignUpForm() {
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
-    dispatch(fetchRoles()); // Komponent yüklendiğinde rolleri çek
-  }, [dispatch,roles]);
-
-  console.log(roles);
-  const onSubmit = async (data) => {
-    const { confirmPassword, ...formData } = data; // confirmPassword alanını kaldır
-    if(data.role_id !== "2") {
-      delete formData.store; // Mağaza rolü değilse store bilgilerini sil
+    // Rol listesi store'da yoksa fetch işlemi yap
+    if (!roles || roles.length === 0) {
+        dispatch(fetchRoles());
     }
-  };
+}, [dispatch, roles]);
+const onSubmit = async (data) => {
+  // Confirm password alanını backend kabul etmiyor.
+  delete data.confirmPassword;
+
+  setLoading(true);
+  try {
+    const response = await axiosInstance.post("/signup", data);
+    alert('Tebrikler! Kullanıcı başarıyla oluşturuldu. Aktivasyon mailinizi kontrol edin.');
+    setLoading(false);
+
+    window.location.href = '/'; //anasayfaya yönlendirme
+  } catch (error) {
+    console.error('SignUp işlemi başarısız:', error.response?.data.message || error.message);
+    alert('SignUp işlemi başarılı olmadı, hata: ' + (error.response?.data.message || error.message));
+    setLoading(false);
+  }
+};
 
   const isStoreSelected = watch("role_id") === "2";
 
