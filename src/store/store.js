@@ -5,6 +5,7 @@ import { thunk } from "redux-thunk";
 import logger from "redux-logger";
 import { globalReducer } from "./reducers/globalReducer";
 import { userReducer } from "./reducers/userReducer";
+import { composeWithDevTools } from '@redux-devtools/extension';
 
 const rootReducer = combineReducers({
   global: globalReducer,
@@ -14,5 +15,7 @@ const rootReducer = combineReducers({
 
 export const store = createStore(
   rootReducer,
-  applyMiddleware(thunk, logger)
+  composeWithDevTools(
+    applyMiddleware(thunk, logger)
+  )
 );
