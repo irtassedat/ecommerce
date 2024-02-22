@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import axiosInstance from '../../mock/axiosInstance';
 import { SET_USER, CLEAR_USER } from "../userTypes";
 
@@ -13,14 +14,14 @@ export const clearUser = () => ({
 export const loginUser = (formData) => async (dispatch) => {
   try {
     const response = await axiosInstance.post("/login", formData);
-    dispatch(setUser(response.data));
+    // Başarılı giriş sonrası kullanıcı bilgileri ve token ayarlanıyor
+    dispatch(setUser({ ...response.data.user, token: response.data.token }));
     localStorage.setItem('token', response.data.token); // Token'ı localStorage'a kaydet
-    // Kullanıcıyı anasayfaya yönlendir
-    window.location.href = '/home';
+    toast.success("Başarıyla giriş yapıldı!");
+    return { success: true };
   } catch (error) {
     console.error("Login Error:", error);
-    // Hata mesajı göster
-    // Bu kısım uygulamanızın tasarımına bağlı olarak değişiklik gösterebilir
-    alert("Login failed: " + error.response.data.message);
+    toast.error('Giriş başarısız: ' + (error.response?.data.message || error.message));
+    return { success: false, message: error.response?.data.message || error.message };
   }
 };

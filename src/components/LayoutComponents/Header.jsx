@@ -1,4 +1,7 @@
-import React from 'react'
+import React, {useEffect,useState} from 'react'
+import { useSelector, useDispatch } from 'react-redux';
+import { clearUser } from '../../store/actions/userActions';
+import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom/cjs/react-router-dom.min'
 import { faPhone, faPhone as faSolidPhone } from '@fortawesome/free-solid-svg-icons';
@@ -6,10 +9,30 @@ import { faEnvelope as faRegularEnvelope } from '@fortawesome/free-regular-svg-i
 import { faUser as faRegularUser, faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons';
 import { faMagnifyingGlass as faSolidMagnifyingGlass, faCartShopping as faSolidCartShopping } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faYoutube, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
+import { useGravatar } from 'use-gravatar';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 
 
 export default function Header() {
+    const dispatch = useDispatch();
+    const history = useHistory();
+    const user = useSelector(state => state.user.userInfo);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+    const gravatarUrl = useGravatar(user?.email);
+    
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem('token'));
+    }, [user]);
+
+
+    const handleLogout = () => {
+        dispatch(clearUser());
+        localStorage.removeItem('token');
+        setIsLoggedIn(false); // Update local state to reflect logout
+        history.push('/login');
+        toast.info("Çıkış yapıldı.");
+    };
 
     return (
         <>
@@ -43,8 +66,18 @@ export default function Header() {
                         </nav>
                     </div>
                     <div className='flex gap-5 text-sm leading-6 text-[#23A6F0]'>
-                        <a href="/signup"><FontAwesomeIcon icon={faRegularUser} /> Login / Register</a>
-                        <div><FontAwesomeIcon icon={faSolidMagnifyingGlass} /></div>
+                    {isLoggedIn ? (
+                        <>
+                            <img src={gravatarUrl} alt="User Avatar" style={{ width: 30, height: 30, borderRadius: '50%' }} />
+                            <span>Hello, {user.name || user.email}</span>
+                            <button onClick={handleLogout}>Çıkış Yap</button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login"><FontAwesomeIcon icon={faRegularUser} /> Login</Link>
+                            <Link to="/signup">Register</Link>
+                        </>
+                        )}
                         <div><FontAwesomeIcon icon={faSolidCartShopping} /> 1</div>
                         <div><FontAwesomeIcon icon={faRegularHeart} /> 1</div>
                     </div>
