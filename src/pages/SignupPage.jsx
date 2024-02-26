@@ -36,7 +36,7 @@ const onSubmit = async (data) => {
     alert('Tebrikler! Kullanıcı başarıyla oluşturuldu. Aktivasyon mailinizi kontrol edin.');
     setLoading(false);
 
-    window.location.href = '/'; //anasayfaya yönlendirme
+    window.location.href = '/login'; //anasayfaya yönlendirme
   } catch (error) {
     console.error('SignUp işlemi başarısız:', error.response?.data.message || error.message);
     alert('SignUp işlemi başarılı olmadı, hata: ' + (error.response?.data.message || error.message));
