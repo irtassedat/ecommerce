@@ -5,6 +5,8 @@ import ContactPage from "../../pages/ContactPage"
 import TeamPage from "../../pages/TeamPage"
 import AboutPage from "../../pages/AboutPage"
 import ProductPage from "../../pages/ProductPage"
+import SignUpForm from "../../pages/SignupPage";
+import LoginForm from "../../pages/LoginFormPage";
 
 export default function ContentWrapper() {
   return (
@@ -26,6 +28,12 @@ export default function ContentWrapper() {
       </Route>
       <Route path="/ProductPage">
         <ProductPage />
+      </Route>
+      <Route path="/signup">
+        <SignUpForm />
+      </Route>
+      <Route path="/login">
+        <LoginForm /> {}
       </Route>
     </Switch>
   );
