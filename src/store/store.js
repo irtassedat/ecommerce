@@ -4,13 +4,18 @@ import { applyMiddleware, legacy_createStore as createStore, combineReducers } f
 import { thunk } from "redux-thunk";
 import logger from "redux-logger";
 import { globalReducer } from "./reducers/globalReducer";
+import { userReducer } from "./reducers/userReducer";
+import { composeWithDevTools } from '@redux-devtools/extension';
 
 const rootReducer = combineReducers({
-  global: globalReducer, // global anahtarını kullanarak globalReducer'ı ekleyin
-  // Gelecekte buraya daha fazla reducer ekleyebilirsiniz
+  global: globalReducer,
+  user: userReducer,
+  // Gelecek
 });
 
 export const store = createStore(
-  rootReducer, // rootReducer'ı kullanarak store'u oluşturun
-  applyMiddleware(thunk, logger)
+  rootReducer,
+  composeWithDevTools(
+    applyMiddleware(thunk, logger)
+  )
 );

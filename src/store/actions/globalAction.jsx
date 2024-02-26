@@ -1,9 +1,9 @@
 import axiosInstance from '../../mock/axiosInstance'; 
-import { SET_ROLES, SET_CATEGORY, CHANGE_THEME, CHANGE_LANGUAGE } from '../reducers/globalReducer';
+import { SET_ROLES, SET_CATEGORIES, CHANGE_THEME, CHANGE_LANGUAGE } from '../reducers/globalReducer';
 
 // Action creator'ları tanımlayalım
 export const setRoles = (roles) => ({ type: SET_ROLES, payload: roles });
-export const setCategories = (categories) => ({ type: SET_CATEGORY, payload: categories });
+export const setCategories = (categories) => ({ type: SET_CATEGORIES, payload: categories });
 export const changeTheme = (theme) => ({ type: CHANGE_THEME, payload: theme });
 export const changeLanguage = (language) => ({ type: CHANGE_LANGUAGE, payload: language });
 
@@ -22,4 +22,13 @@ export const fetchRoles = () => {
         // Hata durumunda uygun bir işlem yapabilirsiniz
       });
   };
+};
+export const fetchCategories = () => async (dispatch) => {
+  try {
+    const response = await axiosInstance.get('/categories');
+    dispatch(setCategories(response.data)); // API'dan gelen kategorileri setCategories ile dispatch ediyoruz
+  } catch (error) {
+    console.error('Fetching categories failed:', error);
+    // Hata yönetimi için uygun işlemler yapabilirsiniz
+  }
 };

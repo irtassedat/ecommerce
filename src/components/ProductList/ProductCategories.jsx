@@ -1,8 +1,21 @@
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import { categoriesData } from "../../mock/categoriesData";
 import ProductCategoriesCard from "./ProductCategoriesCard";
+import { fetchCategories } from "../../store/actions/globalAction"
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function ProductCategories() {
+
+
+    const dispatch = useDispatch();
+    const categories = useSelector((state) => state.global.categories);
+
+    useEffect(() => {
+        dispatch(fetchCategories());
+    }, [dispatch]);
+
+    const topRatedCategories = categories.sort((a, b) => b.rating - a.rating).slice(0, 5);
 
     return (
         <div className="w-screen bg-[rgb(250,250,250)]">
@@ -16,9 +29,9 @@ export default function ProductCategories() {
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-3.5 items-center justify-center pb-12">
-                    {categoriesData.map((item, index) => {
-                        return <ProductCategoriesCard key={index} data={item} />
-                    })}
+                    {topRatedCategories.map((category, index) => (
+                        <ProductCategoriesCard key={index} data={category} />
+                    ))}
                 </div>
             </div>
         </div>
