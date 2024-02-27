@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
-import { categoriesData } from "../../mock/categoriesData";
 import ProductCategoriesCard from "./ProductCategoriesCard";
 import { fetchCategories } from "../../store/actions/globalAction"
 import React, { useEffect } from 'react';
