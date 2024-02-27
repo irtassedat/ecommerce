@@ -3,12 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
 import { toast } from 'react-toastify';
 import { Link, useHistory } from 'react-router-dom';
-import { faPhone, faEnvelope, faUser, faHeart, faCartShopping } from '@fortawesome/free-solid-svg-icons';
-import { faInstagram, faYoutube, faFacebook, faTwitter,} from '@fortawesome/free-brands-svg-icons';
+import { faPhone, faEnvelope, faUser, faHeart, faCartShopping, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram, faYoutube, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useGravatar } from 'use-gravatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
-
 
 export default function Header() {
     const dispatch = useDispatch();
@@ -33,7 +31,11 @@ export default function Header() {
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-    const closeDropdown = () => setIsDropdownOpen(false);
+    const closeDropdown = (event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsDropdownOpen(false);
+        }
+    };
     
     const groupedCategories = categories.reduce((acc, category) => {
         const genderKey = category.gender === 'k' ? 'Women' : 'Men';
@@ -43,7 +45,6 @@ export default function Header() {
         acc[genderKey].push(category);
         return acc;
     }, {});
-
 
     return (
         <>
@@ -68,7 +69,7 @@ export default function Header() {
                         <h6 className='font-bold text-2xl leading-8'>Bandage</h6>
                         <nav className='flex gap-3 text-sm leading-6 items-center'>
                             <Link to="/">Home</Link>
-                            <div className="relative">
+                            <div className="relative" onBlur={closeDropdown}>
                                 <div onClick={toggleDropdown} className="flex items-center space-x-2 cursor-pointer">
                                     <Link to="/shop" className="text-sm">Shop</Link>
                                     <FontAwesomeIcon icon={faCaretDown} />
@@ -76,7 +77,7 @@ export default function Header() {
                                 {isDropdownOpen && (
                                     <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
                                         {Object.keys(groupedCategories).map((gender, index) => (
-                                            <div key={index} onMouseLeave={() => setIsDropdownOpen(false)}>
+                                            <div key={index}>
                                                 <div className="px-4 py-2 text-sm text-gray-700 font-bold">{gender}</div>
                                                 {groupedCategories[gender].map((category, categoryIndex) => (
                                                     <Link key={categoryIndex} to={`/shopping/${category.gender}/${category.code}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -85,8 +86,8 @@ export default function Header() {
                                                 ))}
                                             </div>
                                         ))}
-                                     </div>
-                                     )}
+                                    </div>
+                                )}
                             </div>
                             <Link to="/about">About</Link>
                             <Link to="/blog">Blog</Link>
@@ -99,7 +100,7 @@ export default function Header() {
                             <>
                                 <img src={gravatarUrl} alt="User Avatar" style={{ width: 30, height: 30, borderRadius: '50%' }} />
                                 <span>Hello, {user.name || user.email}</span>
-                                <button className=""onClick={handleLogout}>Çıkış Yap</button>
+                                <button onClick={handleLogout}>Çıkış Yap</button>
                             </>
                         ) : (
                             <>
