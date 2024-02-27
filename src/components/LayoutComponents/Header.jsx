@@ -66,7 +66,7 @@ export default function Header() {
                 <div className='max-w-[1500px] flex justify-between my-0 mx-auto h-full items-center'>
                     <div className='flex items-center justify-between w-[50%]'>
                         <h6 className='font-bold text-2xl leading-8'>Bandage</h6>
-                        <nav className='flex gap-3 text-sm leading-6'>
+                        <nav className='flex gap-3 text-sm leading-6 items-center'>
                             <Link to="/">Home</Link>
                             <div className="relative">
                                 <div onClick={toggleDropdown} className="flex items-center space-x-2 cursor-pointer">
@@ -94,12 +94,12 @@ export default function Header() {
                             <Link to="/">Pages</Link>
                         </nav>
                     </div>
-                    <div className='flex gap-5 text-sm leading-6 text-[#23A6F0]'>
+                    <div className='flex gap-4 items-center text-sm leading-4 text-[#23A6F0]'>
                         {isLoggedIn ? (
                             <>
                                 <img src={gravatarUrl} alt="User Avatar" style={{ width: 30, height: 30, borderRadius: '50%' }} />
                                 <span>Hello, {user.name || user.email}</span>
-                                <button onClick={handleLogout}>Çıkış Yap</button>
+                                <button className=""onClick={handleLogout}>Çıkış Yap</button>
                             </>
                         ) : (
                             <>
