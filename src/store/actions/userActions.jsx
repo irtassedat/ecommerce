@@ -13,10 +13,14 @@ export const clearUser = () => ({
 
 export const loginUser = (formData) => async (dispatch) => {
   try {
-    const response = await axiosInstance.post("/login", formData);
-    // Başarılı giriş sonrası kullanıcı bilgileri ve token ayarlanıyor
-    dispatch(setUser({ ...response.data.user, token: response.data.token }));
-    localStorage.setItem('token', response.data.token); // Token'ı localStorage'a kaydet
+    const loginResponse = await axiosInstance.post("/login", formData);
+    localStorage.setItem('token', loginResponse.data.token);
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${loginResponse.data.token}`;
+
+    const verifyResponse = await axiosInstance.get("/verify");
+    // `/verify` isteğinin başarılı olması durumunda kullanıcı bilgilerini güncelle
+    dispatch(setUser(verifyResponse.data));
+
     toast.success("Başarıyla giriş yapıldı!");
     return { success: true };
   } catch (error) {
