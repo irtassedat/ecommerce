@@ -10,21 +10,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
 
-const DropdownMenu = ({ categories, closeDropdown }) => {
-    return (
-        <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20" onMouseLeave={closeDropdown}>
-            {categories.map((category, index) => (
-                <Link key={index} to={`/shopping/${category.gender}/${category.code}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={closeDropdown}>
-                    {`${category.gender === 'm' ? 'Men' : 'Women'}: ${category.title}`}
-                </Link>
-            ))}
-        </div>
-    );
-};
-
 export default function Header() {
     const dispatch = useDispatch();
-    const history = useHistory(); // Adjusted to useHistory
+    const history = useHistory();
     const user = useSelector(state => state.user.userInfo);
     const categories = useSelector(state => state.global.categories);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -34,7 +22,7 @@ export default function Header() {
     useEffect(() => {
         setIsLoggedIn(!!localStorage.getItem('token'));
     }, [user]);
-
+    
     const handleLogout = () => {
         dispatch(clearUser());
         localStorage.removeItem('token');
@@ -46,6 +34,16 @@ export default function Header() {
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
     const closeDropdown = () => setIsDropdownOpen(false);
+    
+    const groupedCategories = categories.reduce((acc, category) => {
+        const genderKey = category.gender === 'k' ? 'Women' : 'Men';
+        if (!acc[genderKey]) {
+          acc[genderKey] = [];
+        }
+        acc[genderKey].push(category);
+        return acc;
+    }, {});
+
 
     return (
         <>
@@ -70,12 +68,25 @@ export default function Header() {
                         <h6 className='font-bold text-2xl leading-8'>Bandage</h6>
                         <nav className='flex gap-3 text-sm leading-6'>
                             <Link to="/">Home</Link>
-                            <div className="relative" onMouseLeave={closeDropdown}>
+                            <div className="relative">
                                 <div onClick={toggleDropdown} className="flex items-center space-x-2 cursor-pointer">
                                     <Link to="/shop" className="text-sm">Shop</Link>
                                     <FontAwesomeIcon icon={faCaretDown} />
                                 </div>
-                                {isDropdownOpen && <DropdownMenu categories={categories} closeDropdown={closeDropdown} />}
+                                {isDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
+                                        {Object.keys(groupedCategories).map((gender, index) => (
+                                            <div key={index} onMouseLeave={() => setIsDropdownOpen(false)}>
+                                                <div className="px-4 py-2 text-sm text-gray-700 font-bold">{gender}</div>
+                                                {groupedCategories[gender].map((category, categoryIndex) => (
+                                                    <Link key={categoryIndex} to={`/shopping/${category.gender}/${category.code}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        {category.title}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ))}
+                                     </div>
+                                     )}
                             </div>
                             <Link to="/about">About</Link>
                             <Link to="/blog">Blog</Link>
