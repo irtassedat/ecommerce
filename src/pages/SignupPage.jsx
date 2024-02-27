@@ -27,7 +27,6 @@ export default function SignUpForm() {
     }
 }, [dispatch, roles]);
 const onSubmit = async (data) => {
-  // Confirm password alanını backend kabul etmiyor.
   delete data.confirmPassword;
 
   setLoading(true);
@@ -36,7 +35,7 @@ const onSubmit = async (data) => {
     alert('Tebrikler! Kullanıcı başarıyla oluşturuldu. Aktivasyon mailinizi kontrol edin.');
     setLoading(false);
 
-    window.location.href = '/login'; //anasayfaya yönlendirme
+    window.location.href = '/login';
   } catch (error) {
     console.error('SignUp işlemi başarısız:', error.response?.data.message || error.message);
     alert('SignUp işlemi başarılı olmadı, hata: ' + (error.response?.data.message || error.message));

@@ -10,8 +10,8 @@ import { bestseller } from "../mock/bestSellerData";
 import ProductCardSecond from "../components/ProductPage/ProductCardSecond";
 import Clients from "../components/AboutPage/Clients";
 import React from 'react';
-import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons'; // Regular kalp
-import { faCartShopping, faEye } from '@fortawesome/free-solid-svg-icons'; // Solid alışveriş sepeti ve göz ikonları
+import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
+import { faCartShopping, faEye } from '@fortawesome/free-solid-svg-icons';
 
 
 const colors = ["23A6F0", "2DC071", "E77C40", "252B42"];

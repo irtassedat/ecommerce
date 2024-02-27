@@ -15,7 +15,6 @@ export default function Main() {
         if (token) {
             axiosInstance.get('/verify')
             .then(response => {
-                // Token doğrulandı, kullanıcı bilgilerini store'a kaydet
                 dispatch(setUser(response.data));
                 // Token'ı yenile, bu örnekte backend tarafından yenilenmiş token dönülüyor varsayılmıştır
                 localStorage.setItem('token', response.data.token);
