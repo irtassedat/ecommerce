@@ -6,10 +6,12 @@ import logger from "redux-logger";
 import { globalReducer } from "./reducers/globalReducer";
 import { userReducer } from "./reducers/userReducer";
 import { composeWithDevTools } from '@redux-devtools/extension';
+import { productReducer } from "./reducers/productReducer";
 
 const rootReducer = combineReducers({
   global: globalReducer,
   user: userReducer,
+  product: productReducer,
   // Gelecek
 });
 

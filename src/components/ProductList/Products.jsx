@@ -1,55 +1,194 @@
-import { Button, ButtonGroup } from "reactstrap"
-import { bestseller } from "../../mock/bestSellerData"
-import ProductCard from "./ProductCard"
+import { Button, ButtonGroup } from "reactstrap";
+import ProductCard from "./ProductCard";
+import React, { useEffect, useState, useCallback } from 'react';
+import { fetchProducts, setActivePage } from "../../store/actions/productActions";
+import { useSelector, useDispatch } from "react-redux";
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from "../../mock/axiosInstance";
+import debounce from 'lodash/debounce';
 
 
 export default function Products() {
+    const { page } = useParams(); // URL'den sayfa numarasını oku
+    const history = useHistory();
+    const dispatch = useDispatch();
+    const { productList, fetchState, productCount, pageCount,} = useSelector(state => state.product);
+    const [currentPage, setCurrentPage] = useState(page ? parseInt(page, 10) : 1);
+    const [sort, setSort] = useState('');
+    const [filter, setFilter] = useState('');
+    const [category, setCategory] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 50), []);
+
+    useEffect(() => {
+        dispatch(fetchProducts(category, searchTerm, sort, 20, (currentPage - 1) * 20, currentPage));
+    }, [dispatch, currentPage, category, searchTerm, sort]);    
+    
+    useEffect(() => {
+        history.push(`/shop?page=${currentPage}`); // URL'i güncelle
+    }, [currentPage, history]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosInstance.get('/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Kategorileri çekerken bir hata oluştu:', error);
+            }
+        };
+    
+        fetchCategories();
+    }, []);
+
+    const handlePageClick = (page) => {
+        setCurrentPage(page);
+        // Kullanıcı tarafından seçilen sayfaya göre 20 ürün yüklemek için
+        dispatch(fetchProducts("", "", "", 20, (page - 1) * 20, page));
+    };
+    
+    const handleSortChange = (event) => {
+        const selectedSort = event.target.value;
+        setSort(selectedSort);
+        // Kullanıcı tarafından seçilen sıralamayı kullanarak ürünleri yeniden yükle
+        dispatch(fetchProducts(category, filter, selectedSort, 20, (currentPage - 1) * 20, currentPage));
+    };
+
+    const handleFilterSubmit = () => {
+        setCurrentPage(1);
+        dispatch(fetchProducts(category, filter, sort, 20, 0, 1));
+    };
+    
+    const handleFilterChange = (event) => {
+        setFilter(event.target.value);
+    };
+
+    const handleCategoryChange = (event) => {
+        setCategory(event.target.value);
+        setCurrentPage(1); // Kategori değiştiğinde ilk sayfaya dön
+        dispatch(fetchProducts(event.target.value, filter, sort, 20, 0, 1));
+    };
+
+    const handleSearchChange = (event) => {
+        const { value } = event.target;
+        debouncedSearchTerm(value); // Kullanıcı arama yaparken debouncedSearchTerm fonksiyonunu çağırın
+    };
+
+    const groupedCategories = categories.reduce((acc, category) => {
+        const key = category.gender === "k" ? "Kadın" : "Erkek";
+        if (!acc[key]) {
+            acc[key] = [];
+        }
+        acc[key].push(category);
+        return acc;
+    }, {});
+
+    const categoryOptions = Object.entries(groupedCategories).map(([gender, categories]) => (
+        <optgroup label={gender} key={gender}>
+            {categories.map((category) => (
+                <option value={category.id} key={category.id}>
+                    {category.title}
+                </option>
+            ))}
+        </optgroup>
+    ));
+
+    const renderPagination = () => {
+        let pages = [];
+        const pageNumbers = [];
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(pageCount, currentPage + 2);
+    
+        // İlk ve Önceki Butonları
+        if (currentPage > 1) {
+            pages.push(
+                <button key="first" onClick={() => handlePageClick(1)} className="px-4 py-2 text-gray-500 hover:text-blue-600">
+                    {"<<"} İlk
+                </button>,
+                <button key="prev" onClick={() => handlePageClick(currentPage - 1)} className="px-4 py-2 text-gray-500 hover:text-blue-600">
+                    {"<"} Önceki
+                </button>
+            );
+        }
+    
+        // Sayfa Numaraları
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+    
+        // Ellipsis için kontrol, sayfa sayısı çok fazla olduğunda
+        if (startPage > 2) {
+            pages.push(<span key="startEllipsis" className="px-4 py-2">...</span>);
+        }
+    
+        pages = pages.concat(
+            pageNumbers.map(number =>
+                <button
+                    key={number}
+                    onClick={() => handlePageClick(number)}
+                    className={`px-4 py-2 ${currentPage === number ? 'text-white bg-blue-500' : 'text-blue-600 hover:bg-blue-100'} hover:text-blue-600`}
+                >
+                    {number}
+                </button>
+            )
+        );
+    
+        if (endPage < pageCount - 1) {
+            pages.push(<span key="endEllipsis" className="px-4 py-2">...</span>);
+        }
+    
+        // Sonraki ve Son Butonları
+        if (currentPage < pageCount) {
+            pages.push(
+                <button key="next" onClick={() => handlePageClick(currentPage + 1)} className="px-4 py-2 text-gray-500 hover:text-blue-600">
+                    Sonraki {">"}
+                </button>,
+                <button key="last" onClick={() => handlePageClick(pageCount)} className="px-4 py-2 text-gray-500 hover:text-blue-600">
+                    Son {">>"}
+                </button>
+            );
+        }
+    
+        return <div className="flex justify-center items-center space-x-1 mt-4 pb-14">{pages}</div>;
+    };
+    
+    
 
     return (
         <div className="w-screen flex flex-col">
             <div className="my-0 mx-auto max-w-[1050px]">
                 <div className="flex justify-between items-center py-6">
-                    <p className="text-[#737373] font-bold text-sm leading-6">Showing all X! results</p>
+                    <p className="text-[#737373] font-bold text-sm leading-6">Showing all {productCount} results</p>
+                    <input
+                        type="text"
+                        value={filter}
+                        onChange={handleSearchChange}
+                        placeholder="Ara..."
+                        className="pl-3 pr-10 py-2 border-[1px] w-full max-w-xs text-[#737373] bg-[#DDDDDD] rounded"
+                    />
                     <div className="flex items-center gap-3.5">
-                        <p className="text-[#737373] font-bold text-sm leading-6">Views: </p>
-                        <button className="h-[46px] w-[46px] border-[1px] rounded">+</button>
-                        <button className="h-[46px] w-[46px] border-[1px] rounded">-</button>
-                    </div>
-                    <div className="flex gap-3.5">
-                        <select name="vals" id="vals" className="pl-3 border-[1px] w-[150px] text-[#737373] bg-[#DDDDDD] rounded">
-                            <option value="val1">Popularity</option>
-                            <option value="val2">Val2</option>
-                            <option value="val3">Val3</option>
-                            <option value="val4">Val4</option>
+                        <select value={category}
+                        onChange={handleCategoryChange}
+                        className="pl-3 pr-10 py-2 border-[1px] w-full max-w-xs text-[#737373] bg-[#DDDDDD] rounded">
+                            <option value="">Tüm Kategoriler</option>
+                            {categoryOptions}
                         </select>
-                        <button className="px-5 py-2.5 text-white bg-[#23A6F0] rounded">Filter</button>
+                        <select name="sort" id="sort" value={sort} onChange={handleSortChange} className="pl-3 pr-10 py-2 border-[1px] w-full max-w-xs text-[#737373] bg-[#DDDDDD] rounded">
+                            <option value="">Sıralama Seçin</option>
+                            <option value="price:asc">Fiyata Göre Artan</option>
+                            <option value="price:desc">Fiyata Göre Azalan</option>
+                            <option value="rating:asc">Puanlama Artan</option>
+                            <option value="rating:desc">Puanlama Azalan</option>
+                        </select>
+                        <button onClick={handleFilterSubmit} className="px-5 py-2.5 text-white bg-[#23A6F0] rounded">Filtrele</button>
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-x-7 gap-y-20 justify-center py-12">
-                    {bestseller.map((item, index) => {
-                        return <ProductCard key={index} data={item} size={[240, 300]} />
-                    })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-11">
+                    {fetchState === 'FETCHING' ? <p>Loading...</p> : productList.map((item, index) => <ProductCard key={index} data={item} size={[240, 300]} />)}
                 </div>
-                <div className="w-full flex justify-center pb-12">
-                    <ButtonGroup className="me-2">
-                        <Button color="light" size="lg" className="border-2 border-inherit" >
-                            First
-                        </Button>
-                        <Button color="light" size="lg" className="border-2 border-inherit">
-                            1
-                        </Button>
-                        <Button color="primary" size="lg" className="border-2 border-inherit"  >
-                            2
-                        </Button>
-                        <Button color="light" size="lg" className="border-2 border-inherit">
-                            3
-                        </Button>
-                        <Button color="light" size="lg" className="border-2 border-inherit">
-                            Next
-                        </Button>
-                    </ButtonGroup>
-                </div>
+                {renderPagination()}
             </div>
         </div>
-    )
+    );
 }
