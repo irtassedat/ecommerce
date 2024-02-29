@@ -1,4 +1,3 @@
-
 export const SET_PRODUCT = "SET_PRODUCT";
 export const SET_PRODUCTCOUNT = "SET_PRODUCTCOUNT";
 export const SET_PAGECOUNT = "SET_PAGECOUNT";
@@ -16,7 +15,7 @@ const initialState = {
   productList: [],
   productCount: 0,
   pageCount: 0,
-  activePage: 0,
+  activePage: 1,
   fetchState: FETCH_STATES.NotFetched,
 };
 
