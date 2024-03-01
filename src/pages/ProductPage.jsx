@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import Rating from '@mui/material/Rating';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ProductDetails from "../components/ProductPage/ProductDetails";
+import ProductDetails from "../components/productpage/ProductDetails";
 import { bestseller } from "../mock/bestSellerData";
-import ProductCardSecond from "../components/ProductPage/ProductCardSecond";
-import Clients from "../components/AboutPage/Clients";
+import ProductCardSecond from "../components/productpage/ProductCardSecond";
+import Clients from "../components/aboutpage/Clients";
 import React, { useEffect, useState } from 'react';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { faCartShopping, faEye } from '@fortawesome/free-solid-svg-icons';

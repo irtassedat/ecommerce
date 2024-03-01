@@ -1,4 +1,4 @@
-import Main from "./components/LayoutComponents/Main";
+import Main from "./components/layoutcomponents/Main";
 import './App.css'
 
 function App() {

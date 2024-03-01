@@ -1,7 +1,7 @@
-import Clients from "../components/AboutPage/Clients";
-import TeamMemberCard from "../components/TeamPage/TeamMemberCard";
+import Clients from "../components/aboutpage/Clients";
+import TeamMemberCard from "../components/teampage/TeamMemberCard";
 import { memberDataSmall } from "../mock/memberData";
-import AboutHeader from "../components/AboutPage/AboutHeader";
+import AboutHeader from "../components/aboutpage/AboutHeader";
 
 
 

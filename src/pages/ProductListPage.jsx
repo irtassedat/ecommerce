@@ -1,6 +1,6 @@
-import Clients from "../components/ProductList/Clients";
-import ProductCategories from "../components/ProductList/ProductCategories";
-import Products from "../components/ProductList/Products";
+import Clients from "../components/productlist/Clients";
+import ProductCategories from "../components/productlist/ProductCategories";
+import Products from "../components/productlist/Products";
 
 
 export default function ProductListPage() {

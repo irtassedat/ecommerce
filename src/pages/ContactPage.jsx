@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import ContactCard from '../components/ContactPage/ContactCard'
+import ContactCard from '../components/contactpage/ContactCard'
 import { contactCardData } from '../mock/contactCardData'
 import { faInstagram, faTwitter, faLinkedin, faFacebook } from '@fortawesome/free-brands-svg-icons';
 

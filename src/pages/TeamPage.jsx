@@ -1,5 +1,5 @@
 import { memberDataBig } from "../mock/memberData";
-import TeamMemberCard from "../components/TeamPage/TeamMemberCard";
+import TeamMemberCard from "../components/teampage/TeamMemberCard";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInstagram, faFacebook, faTwitter, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 

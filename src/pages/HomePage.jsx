@@ -1,9 +1,9 @@
-import EditorsPick from "../components/HomePage/EditorsPick";
-import BestSeller from "../components/HomePage/BestSellerProducts";
-import SummerCard from "../components/HomePage/SummerCard";
-import FeaturedPosts from "../components/HomePage/FeaturedPosts";
+import EditorsPick from "../components/homepage/EditorsPick";
+import BestSeller from "../components/homepage/BestSellerProducts";
+import SummerCard from "../components/homepage/SummerCard";
+import FeaturedPosts from "../components/homepage/FeaturedPosts";
 import { firstCarouselContent, secondCarouselContent } from "../mock/carouselContentsData"
-import CarouselComponent from "../components/HomePage/Carousel";
+import CarouselComponent from "../components/homepage/Carousel";
 
 
 export default function HomePage() {

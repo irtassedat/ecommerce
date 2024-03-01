@@ -1,7 +1,7 @@
 import { Route, Switch, NavLink } from "react-router-dom/cjs/react-router-dom.min";
-import Description from "../ProductPage/Description";
-import AdditionalInformation from "../ProductPage/AdditionalInformation";
-import Reviews from "../ProductPage/Reviews";
+import Description from "./Description";
+import AdditionalInformation from "./AdditionalInformation";
+import Reviews from "./Reviews";
 
 
 export default function ProductDetails() {

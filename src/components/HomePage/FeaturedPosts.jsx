@@ -1,4 +1,4 @@
-import PostCard from "../HomePage/PostCard"
+import PostCard from "./PostCard"
 
 const cardData = [
     {
