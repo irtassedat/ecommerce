@@ -26,7 +26,7 @@ export default function ContentWrapper() {
       <Route path="/contact">
         <ContactPage />
       </Route>
-      <Route path="/ProductPage">
+      <Route path="/:category/:productId/:productNameSlug">
         <ProductPage />
       </Route>
       <Route path="/signup">

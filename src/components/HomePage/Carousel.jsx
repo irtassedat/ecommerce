@@ -7,9 +7,7 @@ import {
     CarouselCaption
 } from 'reactstrap';
 
-
 class CarouselComponent extends Component {
-
     constructor(props) {
         super(props);
         this.state = { activeIndex: 0 };
@@ -30,13 +28,13 @@ class CarouselComponent extends Component {
 
     next() {
         if (this.animating) return;
-        const nextIndex = this.state.activeIndex === items.length - 1 ? 0 : this.state.activeIndex + 1;
+        const nextIndex = this.state.activeIndex === this.props.items.length - 1 ? 0 : this.state.activeIndex + 1;
         this.setState({ activeIndex: nextIndex });
     }
 
     previous() {
         if (this.animating) return;
-        const nextIndex = this.state.activeIndex === 0 ? items.length - 1 : this.state.activeIndex - 1;
+        const nextIndex = this.state.activeIndex === 0 ? this.props.items.length - 1 : this.state.activeIndex - 1;
         this.setState({ activeIndex: nextIndex });
     }
 
@@ -49,17 +47,16 @@ class CarouselComponent extends Component {
         const { activeIndex } = this.state;
         const { items } = this.props;
 
-        const slides = items.map((item) => {
+        const slides = items.map((item, index) => {
             return (
                 <CarouselItem
                     onExiting={this.onExiting}
                     onExited={this.onExited}
-                    key={item.src}
+                    key={item.src + index} // Dizin ile birlikte src'yi key olarak kullan
                     className='w-full mx-auto my-0'
-
                 >
                     <img className='w-full max-h-[720px] object-cover' src={item.src} alt={item.altText} />
-                    <CarouselCaption captionText={item.caption} captionHeader={item.caption} />
+                    {item.caption && <CarouselCaption captionText={item.caption} captionHeader={item.caption} />}
                 </CarouselItem>
             );
         });
@@ -78,6 +75,5 @@ class CarouselComponent extends Component {
         );
     }
 }
-
 
 export default CarouselComponent;
