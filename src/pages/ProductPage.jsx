@@ -2,7 +2,6 @@ import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import Rating from '@mui/material/Rating';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProductDetails from "../components/ProductPage/ProductDetails";
-
 import { bestseller } from "../mock/bestSellerData";
 import ProductCardSecond from "../components/ProductPage/ProductCardSecond";
 import Clients from "../components/AboutPage/Clients";
@@ -42,15 +41,9 @@ export default function ProductPage() {
         return <p>Ürün yükleniyor...</p>;
     }
 
-    const slides = product.images.map(img => img.url);
     const productImageUrls = product.images.map(img => img.url);
     const repeatedImageUrls = [...productImageUrls, ...productImageUrls];
 
-    const carouselItems = product.images.map(image => ({
-        src: image.url,
-        altText: product.name,
-        caption: product.description
-    }));
 
 
     return (
