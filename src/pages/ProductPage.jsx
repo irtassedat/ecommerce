@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
-import { thirdCarouselContent } from "../mock/carouselContentsData";
 import Rating from '@mui/material/Rating';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProductDetails from "../components/ProductPage/ProductDetails";
-import CarouselComponent from "../components/HomePage/Carousel";
-import { imageBasePath } from "../../public/imgBasePath";
+
 import { bestseller } from "../mock/bestSellerData";
 import ProductCardSecond from "../components/ProductPage/ProductCardSecond";
 import Clients from "../components/AboutPage/Clients";
@@ -13,13 +11,14 @@ import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { faCartShopping, faEye } from '@fortawesome/free-solid-svg-icons';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../mock/axiosInstance';
+import Carousel from '../pages/carousel.component.jsx'
 
 const colors = ["23A6F0", "2DC071", "E77C40", "252B42"];
 
 
 
 export default function ProductPage() {
-    const [currIndex, setCurrIndex] = useState(0);
+    const [currIndex, setCurrIndex] = React.useState(0);
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
 
@@ -27,18 +26,32 @@ export default function ProductPage() {
         const fetchProductDetails = async () => {
             try {
                 const response = await axiosInstance.get(`/products/${productId}`);
+                // API'den gelen ürünü state'e kaydet
                 setProduct(response.data);
             } catch (error) {
                 console.error('Ürün detayları çekilirken bir hata oluştu:', error);
             }
         };
-
+    
         fetchProductDetails();
     }, [productId]);
+
+    
 
     if (!product) {
         return <p>Ürün yükleniyor...</p>;
     }
+
+    const slides = product.images.map(img => img.url);
+    const productImageUrls = product.images.map(img => img.url);
+    const repeatedImageUrls = [...productImageUrls, ...productImageUrls];
+
+    const carouselItems = product.images.map(image => ({
+        src: image.url,
+        altText: product.name,
+        caption: product.description
+    }));
+
 
     return (
         <>
@@ -53,16 +66,19 @@ export default function ProductPage() {
                 <div className="max-w-[1050px] mx-auto flex gap-[30px] pb-12">
                     <div>
                         <div className="w-[506px] h-[450px]">
-                            <CarouselComponent items={thirdCarouselContent} setCurrIndex={setCurrIndex} currIndex={currIndex} />
+                             <Carousel slides={repeatedImageUrls} />
                         </div>
                         <div className="flex gap-[19px] pt-5">
-                            {/** Carousel navigasyonu için indeks kontrolü */
-                            thirdCarouselContent
-                            .slice(currIndex, Math.min(currIndex + 2, thirdCarouselContent.length))
-                            .map((item, index) => {
-                                return <img className="w-[100px] h-[75px] object-cover" key={item.src + index} src={imageBasePath + item.src} />;
-                                })
-                            }    
+                            {/* Carousel altında küçük resim navigasyonu */}
+                            {productImageUrls.slice(0, 2).map((url, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrIndex(index)}
+                                    className={`w-20 h-20 md:w-24 md:h-24 overflow-hidden rounded-lg border ${currIndex === index ? 'border-blue-500' : 'border-transparent'}`}
+                                >
+                                    <img src={url} alt={`Thumbnail ${index}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}  
                         </div>
                     </div>
 
