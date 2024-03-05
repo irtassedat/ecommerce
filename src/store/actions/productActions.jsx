@@ -47,7 +47,7 @@ export const fetchProducts = (category = "", filter = "", sort = "", limit = "",
 
 
 
-export const fetchProductsWithId = (id) => async (dispatch) => {
+export const ductsWithId = (id) => async (dispatch) => {
   dispatch(setFetchState("FETCHING"));
   try {
     const response = await axios.get(`/products/${id}`);

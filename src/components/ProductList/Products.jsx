@@ -1,9 +1,9 @@
 import { Button, ButtonGroup } from "reactstrap";
 import ProductCard from "./ProductCard";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import { fetchProducts, setActivePage } from "../../store/actions/productActions";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation} from 'react-router-dom';
 import axiosInstance from "../../mock/axiosInstance";
 import debounce from 'lodash/debounce';
 
@@ -20,15 +20,13 @@ export default function Products() {
     const [categories, setCategories] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 50), []);
+    const location = useLocation();
 
     useEffect(() => {
-        dispatch(fetchProducts(category, searchTerm, sort, 20, (currentPage - 1) * 20, currentPage));
-    }, [dispatch, currentPage, category, searchTerm, sort]);    
+        dispatch(fetchProducts(category, searchTerm, sort, 20, (currentPage - 1) * 20));
+        history.push(`/shop?page=${currentPage}`);
+    }, [dispatch, currentPage, history]);
     
-    useEffect(() => {
-        history.push(`/shop?page=${currentPage}`); // URL'i güncelle
-    }, [currentPage, history]);
-
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -49,25 +47,16 @@ export default function Products() {
     };
     
     const handleSortChange = (event) => {
-        const selectedSort = event.target.value;
-        setSort(selectedSort);
-        // Kullanıcı tarafından seçilen sıralamayı kullanarak ürünleri yeniden yükle
-        dispatch(fetchProducts(category, filter, selectedSort, 20, (currentPage - 1) * 20, currentPage));
+        setSort(event.target.value);
     };
 
-    const handleFilterSubmit = () => {
-        setCurrentPage(1);
+    const handleFilter = () => {
+        setCurrentPage(1); // Her zaman ilk sayfadan başla
         dispatch(fetchProducts(category, filter, sort, 20, 0, 1));
-    };
-    
-    const handleFilterChange = (event) => {
-        setFilter(event.target.value);
     };
 
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
-        setCurrentPage(1); // Kategori değiştiğinde ilk sayfaya dön
-        dispatch(fetchProducts(event.target.value, filter, sort, 20, 0, 1));
     };
 
     const handleSearchChange = (event) => {
@@ -181,7 +170,7 @@ export default function Products() {
                             <option value="rating:asc">Puanlama Artan</option>
                             <option value="rating:desc">Puanlama Azalan</option>
                         </select>
-                        <button onClick={handleFilterSubmit} className="px-5 py-2.5 text-white bg-[#23A6F0] rounded">Filtrele</button>
+                        <button onClick={handleFilter} className="px-5 py-2.5 text-white bg-[#23A6F0] rounded">Filtrele</button>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-11">
