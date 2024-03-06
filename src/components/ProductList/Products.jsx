@@ -1,6 +1,6 @@
 import ProductCard from "./ProductCard";
 import React, { useEffect, useState, useCallback} from 'react';
-import { fetchProducts, setActivePage } from "../../store/actions/productActions";
+import { fetchProducts, } from "../../store/actions/productActions";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useHistory, useLocation} from 'react-router-dom';
 import axiosInstance from "../../mock/axiosInstance";
@@ -8,7 +8,7 @@ import debounce from 'lodash/debounce';
 
 
 export default function Products() {
-    const { page } = useParams(); // URL'den sayfa numarasını oku
+    const { page } = useParams();
     const history = useHistory();
     const dispatch = useDispatch();
     const { productList, fetchState, productCount, pageCount,} = useSelector(state => state.product);
@@ -17,7 +17,6 @@ export default function Products() {
     const [filter, setFilter] = useState('');
     const [category, setCategory] = useState('');
     const [categories, setCategories] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 50), []);
     const location = useLocation();
 
@@ -56,11 +55,17 @@ export default function Products() {
         fetchCategories();
     }, []);
 
-    const handlePageClick = (page) => {
-        setCurrentPage(page);
-        // Kullanıcı tarafından seçilen sayfaya göre 20 ürün yüklemek için
-        dispatch(fetchProducts("", "", "", 20, (page - 1) * 20, page));
-    };
+    const handlePageClick = (newPage) => {
+        // Mevcut query parametrelerini al
+        const params = new URLSearchParams(location.search);
+        // Sayfa numarasını güncelle
+        params.set('page', newPage);
+        // URL'i güncellenmiş parametrelerle değiştir
+        history.push({ pathname: location.pathname, search: params.toString() });
+    
+        // Sayfa numarası ve diğer filtrelerle ürünleri fetch et
+        // Not: Bu kısım zaten location.search değişikliğini dinleyen useEffect içinde yer alıyor.
+    };    
     
     const handleSortChange = (event) => {
         setSort(event.target.value);
@@ -70,7 +75,7 @@ export default function Products() {
     const handleFilter = () => {
         setCurrentPage(1);
         updateQueryParams(); // URL'i güncelle
-        dispatch(fetchProducts(category, filter, sort, 20, 0, 1)); // Ürünleri fetch edin.
+        dispatch(fetchProducts(category, filter, sort, 20, 0, 1));
     };
 
     const handleCategoryChange = (event) => {
@@ -80,7 +85,7 @@ export default function Products() {
 
     const handleSearchChange = (event) => {
         const { value } = event.target;
-        debouncedSearchTerm(value); // Kullanıcı arama yaparken debouncedSearchTerm fonksiyonunu çağırın
+        debouncedSearchTerm(value);
     };
 
     const groupedCategories = categories.reduce((acc, category) => {
