@@ -35,6 +35,9 @@ export default function ContentWrapper() {
       <Route path="/login">
         <LoginForm /> {}
       </Route>
+      <Route path="/shop/:category">
+        <ProductListPage />
+      </Route>
     </Switch>
   );
 }

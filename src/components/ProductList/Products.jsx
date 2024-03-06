@@ -1,4 +1,3 @@
-import { Button, ButtonGroup } from "reactstrap";
 import ProductCard from "./ProductCard";
 import React, { useEffect, useState, useCallback} from 'react';
 import { fetchProducts, setActivePage } from "../../store/actions/productActions";
@@ -22,11 +21,28 @@ export default function Products() {
     const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 50), []);
     const location = useLocation();
 
+    const updateQueryParams = () => {
+        const params = new URLSearchParams();
+        if (category) params.set('category', category);
+        if (sort) params.set('sort', sort);
+        if (filter) params.set('filter', filter);
+        history.push({ pathname: '/shop', search: params.toString() });
+    };
     useEffect(() => {
-        dispatch(fetchProducts(category, searchTerm, sort, 20, (currentPage - 1) * 20));
-        history.push(`/shop?page=${currentPage}`);
-    }, [dispatch, currentPage, history]);
-    
+        const params = new URLSearchParams(location.search);
+        const pageParam = params.get('page');
+        const categoryParam = params.get('category');
+        const sortParam = params.get('sort');
+        const filterParam = params.get('filter');
+      
+        if (pageParam) setCurrentPage(parseInt(pageParam, 10));
+        if (categoryParam) setCategory(categoryParam);
+        if (sortParam) setSort(sortParam);
+        if (filterParam) setFilter(filterParam);
+      
+        dispatch(fetchProducts(categoryParam, filterParam, sortParam, 20, (currentPage - 1) * 20));
+    }, [location.search]); // location.search'e bağlı olarak tetiklenir
+         
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -48,15 +64,18 @@ export default function Products() {
     
     const handleSortChange = (event) => {
         setSort(event.target.value);
+        //updateQueryParams(); // URL'i güncelle
     };
 
     const handleFilter = () => {
-        setCurrentPage(1); // Her zaman ilk sayfadan başla
-        dispatch(fetchProducts(category, filter, sort, 20, 0, 1));
+        setCurrentPage(1);
+        updateQueryParams(); // URL'i güncelle
+        dispatch(fetchProducts(category, filter, sort, 20, 0, 1)); // Ürünleri fetch edin.
     };
 
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
+        //updateQueryParams(); // URL'i güncelle
     };
 
     const handleSearchChange = (event) => {
