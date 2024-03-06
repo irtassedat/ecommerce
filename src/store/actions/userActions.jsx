@@ -16,10 +16,7 @@ export const loginUser = (formData) => async (dispatch) => {
     const loginResponse = await axiosInstance.post("/login", formData);
     localStorage.setItem('token', loginResponse.data.token);
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${loginResponse.data.token}`;
-
-    const verifyResponse = await axiosInstance.get("/verify");
-    // `/verify` isteğinin başarılı olması durumunda kullanıcı bilgilerini güncelle
-    dispatch(setUser(verifyResponse.data));
+    dispatch(setUser(loginResponse.data));
 
     toast.success("Başarıyla giriş yapıldı!");
     return { success: true };
