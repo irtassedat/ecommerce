@@ -6,7 +6,6 @@ import { useParams, useHistory, useLocation} from 'react-router-dom';
 import axiosInstance from "../../mock/axiosInstance";
 import debounce from 'lodash/debounce';
 
-
 export default function Products() {
     const { page } = useParams();
     const history = useHistory();

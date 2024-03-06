@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
@@ -16,6 +17,9 @@ export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const gravatarUrl = useGravatar(user?.email);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const cartItems = useSelector(state => state.shoppingCart.cartList);
+    const [isCartDropdownOpen, setIsCartDropdownOpen] = useState(false);
+
 
     useEffect(() => {
         setIsLoggedIn(!!localStorage.getItem('token'));
@@ -31,6 +35,10 @@ export default function Header() {
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
+    const toggleCartDropdown = () => {
+        setIsCartDropdownOpen(!isCartDropdownOpen);
+    };
+
     const closeDropdown = (event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsDropdownOpen(false);
@@ -45,6 +53,8 @@ export default function Header() {
         acc[genderKey].push(category);
         return acc;
     }, {});
+
+    const totalCartItems = cartItems.reduce((total, item) => total + item.count, 0);
 
     return (
         <>
@@ -108,7 +118,36 @@ export default function Header() {
                                 <Link to="/signup">Register</Link>
                             </>
                         )}
-                        <FontAwesomeIcon icon={faCartShopping} /> 1
+                        <div onClick={toggleCartDropdown} className="relative cursor-pointer">
+                            <FontAwesomeIcon icon={faCartShopping} />
+                            <span> ({totalCartItems})</span>
+                            {isCartDropdownOpen && (
+                                <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
+                                    {/* Sepet içeriğinin listelendiği kısım */}
+                                    <div className="font-bold text-xl mb-4">Sepetim ({cartItems.length} Ürün)</div>
+                                    <div className="flex flex-col gap-4">
+                                        {cartItems.map((item, index) => (
+                                            <div key={index} className="flex gap-4 items-center">
+                                                <img src={item.product.images[0].url} alt={item.product.name} className="w-24 h-24 object-cover" />
+                                                <div>
+                                                    <div className="font-bold">{item.product.name}</div>
+                                                    <div>{item.product.description}</div>
+                                                    <div className="font-bold text-lg">{item.product.price} TL</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="flex justify-between items-center">
+                                            <Link to="/shopping-cart" className="text-white bg-blue-600 hover:bg-blue-700 font-bold py-2 px-4 rounded">
+                                                Sepete Git
+                                            </Link>
+                                            <button className="text-white bg-orange-500 hover:bg-orange-600 font-bold py-2 px-4 rounded">
+                                                Siparişi Tamamla
+                                            </button>
+                                        </div>
+                                    </div>
+                            </div>
+                        )}
+                        </div>
                         <FontAwesomeIcon icon={faHeart} /> 1
                     </div>
                 </div>

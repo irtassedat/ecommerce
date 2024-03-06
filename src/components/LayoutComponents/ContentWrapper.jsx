@@ -7,6 +7,7 @@ import AboutPage from "../../pages/AboutPage"
 import ProductPage from "../../pages/ProductPage"
 import SignUpForm from "../../pages/SignupPage";
 import LoginForm from "../../pages/LoginFormPage";
+import ShoppingCartPage from "../../pages/ShoppingCartPage";
 
 export default function ContentWrapper() {
   return (
@@ -37,6 +38,9 @@ export default function ContentWrapper() {
       </Route>
       <Route path="/shop/:category">
         <ProductListPage />
+      </Route>
+      <Route path="/shopping-cart">
+        <ShoppingCartPage />
       </Route>
     </Switch>
   );
