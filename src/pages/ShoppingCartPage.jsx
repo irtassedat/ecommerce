@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { incrementProductCount, decrementProductCount, removeFromCart, toggleProductChecked } from '../store/actions/shoppingCartAction';
+import { useHistory } from 'react-router-dom';
+
 
 const getRandomSize = () => {
     const sizes = Array.from({ length: 9 }, (_, i) => 24 + i * 2); // 24'ten 40'a kadar 2'şerli
@@ -16,12 +18,14 @@ const ShoppingCartPage = () => {
     const cartItems = useSelector(state => state.shoppingCart.cartList);
     const dispatch = useDispatch();
     
-    const totalPrice = cartItems.reduce((total, item) => total + (item.count * item.product.price), 0);
+    const totalPrice = cartItems
+        .filter(item => item.checked) // Sadece checked durumu true olanları filtrele
+        .reduce((total, item) => total + (item.count * item.product.price), 0);
 
     const shippingFee = 29.99;
     const freeShippingThreshold = 150; // 150 TL ve üzeri için kargo bedava
     const isEligibleForFreeShipping = totalPrice >= freeShippingThreshold;
-    const shippingCost = isEligibleForFreeShipping ? 0 : shippingFee;
+    const shippingCost = totalPrice > 0 ? (totalPrice >= freeShippingThreshold ? 0 : shippingFee) : 0;
 
     const grandTotal = isEligibleForFreeShipping ? totalPrice : totalPrice + shippingCost;
 
@@ -36,6 +40,13 @@ const ShoppingCartPage = () => {
     const handleToggleChecked = (productId) => {
         dispatch(toggleProductChecked(productId));
     };
+
+    const history = useHistory();
+
+    const handleContinueShopping = () => {
+        history.push('/shop');
+    };
+
 
     return (
         <div className="container mx-auto mt-10">
@@ -112,8 +123,11 @@ const ShoppingCartPage = () => {
                             )}
                         </div>
                         <div className="mt-4">
-                            <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
+                            <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
                                 Sepeti Onayla
+                            </button>
+                            <button onClick={handleContinueShopping} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
+                                Alışverişe Devam Et
                             </button>
                         </div>
                     </div>

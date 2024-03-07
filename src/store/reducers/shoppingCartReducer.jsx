@@ -67,8 +67,10 @@ export const shoppingCartReducer = (state = initialState, action) => {
       return {
         ...state,
         cartList: state.cartList.map(item =>
-          item.product.id === action.payload ? { ...item, checked: !item.checked } : item
-        )
+          item.product.id === action.payload
+            ? { ...item, checked: !item.checked }
+            : item
+        ),
       };
     default:
       return state;

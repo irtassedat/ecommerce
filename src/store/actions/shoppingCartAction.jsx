@@ -1,3 +1,5 @@
+import { TOGGLE_PRODUCT_CHECKED } from '../reducers/shoppingCartReducer';
+
 import {
     SET_ADDRESS,
     SET_CART_LIST,
