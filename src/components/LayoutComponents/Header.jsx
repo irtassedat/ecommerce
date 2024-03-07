@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
 import { toast } from 'react-toastify';
@@ -7,6 +7,8 @@ import { faPhone, faEnvelope, faUser, faHeart, faCartShopping, faCaretDown } fro
 import { faInstagram, faYoutube, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useGravatar } from 'use-gravatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { incrementProductCount, decrementProductCount } from '../../store/actions/shoppingCartAction';
+
 
 export default function Header() {
     const dispatch = useDispatch();
@@ -23,7 +25,8 @@ export default function Header() {
         // Kullanıcının giriş yapıp yapmadığını kontrol et
         setIsLoggedIn(!!localStorage.getItem('token'));
     }, [user]);
-    
+
+
     const handleLogout = () => {
         // Kullanıcı çıkış işlemi
         dispatch(clearUser());
@@ -138,10 +141,27 @@ export default function Header() {
                                                 <div className="ml-4 text-center">
                                                     <div className="font-bold text-l text-black">{item.product.name}</div>
                                                     <div className="text-sm text-slate-950/25">{item.product.description}</div>
-                                                    <div className="font-bold text-xl text-orange-600">{item.product.price} TL</div>
+                                                    <div className="font-bold text-base text-orange-600 mt-1.5">{item.product.price * item.count} TL</div>
+                                                    <div className="flex items-center mt-3">
+                                                        <span className="text-gray-700 mr-4    ">Adet:</span>
+                                                        <button onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            dispatch(decrementProductCount(item.product.id));
+                                                        }} className="text-white bg-red-500 hover:bg-red-600 font-bold py-1 px-3 rounded">
+                                                            -
+                                                        </button>
+                                                        <span className="mx-2">{item.count}</span>
+                                                        <button onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            dispatch(incrementProductCount(item.product.id));
+                                                        }} className="text-white bg-green-500 hover:bg-green-600 font-bold py-1 px-3 rounded">
+                                                            +
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
+                                        
                                     </div>
                                     <div className="p-4 flex justify-between items-center">
                                         <Link to="/shopping-cart" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3.5 px-11 rounded">
