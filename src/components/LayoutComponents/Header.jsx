@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
 import { toast } from 'react-toastify';
@@ -7,6 +7,8 @@ import { faPhone, faEnvelope, faUser, faHeart, faCartShopping, faCaretDown } fro
 import { faInstagram, faYoutube, faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useGravatar } from 'use-gravatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { incrementProductCount, decrementProductCount } from '../../store/actions/shoppingCartAction';
+
 
 export default function Header() {
     const dispatch = useDispatch();
@@ -16,12 +18,17 @@ export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const gravatarUrl = useGravatar(user?.email);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const cartItems = useSelector(state => state.shoppingCart.cartList);
+    const [isCartDropdownOpen, setIsCartDropdownOpen] = useState(false);
 
     useEffect(() => {
+        // Kullanıcının giriş yapıp yapmadığını kontrol et
         setIsLoggedIn(!!localStorage.getItem('token'));
     }, [user]);
-    
+
+
     const handleLogout = () => {
+        // Kullanıcı çıkış işlemi
         dispatch(clearUser());
         localStorage.removeItem('token');
         setIsLoggedIn(false);
@@ -29,15 +36,25 @@ export default function Header() {
         toast.info("Çıkış yapıldı.");
     };
 
-    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+    const toggleDropdown = () => {
+        // Kategori düşme menüsünü aç/kapat
+        setIsDropdownOpen(!isDropdownOpen);
+    };
+
+    const toggleCartDropdown = () => {
+        // Sepet düşme menüsünü aç/kapat
+        setIsCartDropdownOpen(!isCartDropdownOpen);
+    };
 
     const closeDropdown = (event) => {
+        // Menü dışında bir yere tıklandığında menüyü kapat
         if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsDropdownOpen(false);
         }
     };
     
     const groupedCategories = categories.reduce((acc, category) => {
+        // Kategorileri cinsiyetlerine göre grupla
         const genderKey = category.gender === 'k' ? 'Women' : 'Men';
         if (!acc[genderKey]) {
           acc[genderKey] = [];
@@ -45,6 +62,9 @@ export default function Header() {
         acc[genderKey].push(category);
         return acc;
     }, {});
+
+    // Sepetteki toplam ürün sayısını hesapla
+    const totalCartItems = cartItems.reduce((total, item) => total + item.count, 0);
 
     return (
         <>
@@ -108,7 +128,52 @@ export default function Header() {
                                 <Link to="/signup">Register</Link>
                             </>
                         )}
-                        <FontAwesomeIcon icon={faCartShopping} /> 1
+                        <div onClick={toggleCartDropdown} className="relative cursor-pointer">
+                            <FontAwesomeIcon icon={faCartShopping} />
+                            <span> ({totalCartItems})</span>
+                            {isCartDropdownOpen && (
+                                <div className="absolute right-0 mt-2 py-4 w-96 bg-white rounded-lg shadow-lg z-20 divide-y divide-gray-200">
+                                    <div className="font-bold text-xl mb-4 p-4">Sepetim ({cartItems.length} Ürün)</div>
+                                    <div className="flex flex-col divide-y divide-gray-200">
+                                        {cartItems.map((item, index) => (
+                                            <div key={index} className="flex gap-4 items-center p-4">
+                                                <img src={item.product.images[0].url} alt={item.product.name} className="object-scale-down max-w-24 max-h-full" />
+                                                <div className="ml-4 text-center">
+                                                    <div className="font-bold text-l text-black">{item.product.name}</div>
+                                                    <div className="text-sm text-slate-950/25">{item.product.description}</div>
+                                                    <div className="font-bold text-base text-orange-600 mt-1.5">{item.product.price * item.count} TL</div>
+                                                    <div className="flex items-center mt-3">
+                                                        <span className="text-gray-700 mr-4    ">Adet:</span>
+                                                        <button onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            dispatch(decrementProductCount(item.product.id));
+                                                        }} className="text-white bg-red-500 hover:bg-red-600 font-bold py-1 px-3 rounded">
+                                                            -
+                                                        </button>
+                                                        <span className="mx-2">{item.count}</span>
+                                                        <button onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            dispatch(incrementProductCount(item.product.id));
+                                                        }} className="text-white bg-green-500 hover:bg-green-600 font-bold py-1 px-3 rounded">
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        
+                                    </div>
+                                    <div className="p-4 flex justify-between items-center">
+                                        <Link to="/shopping-cart" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3.5 px-11 rounded">
+                                            Sepete Git
+                                        </Link>
+                                        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded">
+                                            Siparişi Tamamla
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <FontAwesomeIcon icon={faHeart} /> 1
                     </div>
                 </div>
