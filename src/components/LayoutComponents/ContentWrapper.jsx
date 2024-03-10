@@ -8,6 +8,7 @@ import ProductPage from "../../pages/ProductPage"
 import SignUpForm from "../../pages/SignupPage";
 import LoginForm from "../../pages/LoginFormPage";
 import ShoppingCartPage from "../../pages/ShoppingCartPage";
+import CreateOrderPage from "../../pages/CreateOrderPage";
 
 export default function ContentWrapper() {
   return (
@@ -41,6 +42,9 @@ export default function ContentWrapper() {
       </Route>
       <Route path="/shopping-cart">
         <ShoppingCartPage />
+      </Route>
+      <Route path="/create-order">
+        <CreateOrderPage />
       </Route>
     </Switch>
   );

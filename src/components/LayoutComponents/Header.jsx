@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState,} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
 import { toast } from 'react-toastify';
@@ -65,6 +65,10 @@ export default function Header() {
 
     // Sepetteki toplam ürün sayısını hesapla
     const totalCartItems = cartItems.reduce((total, item) => total + item.count, 0);
+
+    const handleCompleteOrder = () => {
+        history.push('/create-order'); // Kullanıcıyı CreateOrderPage sayfasına yönlendir
+    };
 
     return (
         <>
@@ -164,10 +168,10 @@ export default function Header() {
                                         
                                     </div>
                                     <div className="p-4 flex justify-between items-center">
-                                        <Link to="/shopping-cart" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3.5 px-11 rounded">
+                                        <Link to="/shopping-cart" className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-3.5 px-11 rounded">
                                             Sepete Git
                                         </Link>
-                                        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded">
+                                        <button onClick={handleCompleteOrder} className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-3.5 px-4 rounded">
                                             Siparişi Tamamla
                                         </button>
                                     </div>

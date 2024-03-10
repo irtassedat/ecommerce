@@ -6,11 +6,15 @@ export const INCREMENT_PRODUCT_COUNT = 'INCREMENT_PRODUCT_COUNT';
 export const DECREMENT_PRODUCT_COUNT = 'DECREMENT_PRODUCT_COUNT';
 export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const TOGGLE_PRODUCT_CHECKED = 'TOGGLE_PRODUCT_CHECKED';
+export const FETCH_ADDRESSES_SUCCESS = "FETCH_ADDRESSES_SUCCESS";
+export const ADD_ADDRESS_SUCCESS = "ADD_ADDRESS_SUCCESS";
+export const UPDATE_ADDRESS_SUCCESS = "UPDATE_ADDRESS_SUCCESS";
 
 const initialState = {
   cartList: [], // Alışveriş sepetindeki ürünler
   payment: {}, // Ödeme bilgisi
-  address: {}, // Adres bilgisi
+  addressList: [], // Kullanıcının kaydedilmiş adresleri
+  currentAddress: {}, // Seçili veya yeni eklenen adres
 };
 
 export const shoppingCartReducer = (state = initialState, action) => {
@@ -21,6 +25,15 @@ export const shoppingCartReducer = (state = initialState, action) => {
       return { ...state, payment: action.payload };
     case SET_ADDRESS:
       return { ...state, address: action.payload };
+    case FETCH_ADDRESSES_SUCCESS:
+      return { ...state, addressList: action.payload };
+    case ADD_ADDRESS_SUCCESS:
+      return { ...state, addressList: [...state.addressList, action.payload], currentAddress: action.payload };
+    case UPDATE_ADDRESS_SUCCESS:
+      const updatedAddressList = state.addressList.map(address =>
+        address.id === action.payload.id ? action.payload : address
+      );
+      return { ...state, addressList: updatedAddressList, currentAddress: action.payload };  
     case ADD_TO_CART:
       // Sepete ürün ekleme veya var olan ürünün sayısını artırma
       const productExists = state.cartList.find(item => item.product.id === action.payload.id);
@@ -72,6 +85,7 @@ export const shoppingCartReducer = (state = initialState, action) => {
             : item
         ),
       };
+      
     default:
       return state;
   }

@@ -47,6 +47,9 @@ const ShoppingCartPage = () => {
         history.push('/shop');
     };
 
+    const handleConfirmCart = () => {
+        history.push('/create-order');
+    };
 
     return (
         <div className="container mx-auto mt-10">
@@ -123,7 +126,7 @@ const ShoppingCartPage = () => {
                             )}
                         </div>
                         <div className="mt-4">
-                            <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
+                            <button onClick={handleConfirmCart} className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
                                 Sepeti Onayla
                             </button>
                             <button onClick={handleContinueShopping} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
