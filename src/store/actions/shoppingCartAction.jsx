@@ -30,32 +30,76 @@ import {
 
 export const fetchAddresses = () => async (dispatch) => {
   try {
-    const response = await axiosInstance.get('/user/address');
+    const token = localStorage.getItem('token'); // Token'ı localStorage'dan al
+    const response = await axiosInstance.get('/user/address', {
+      headers: {
+        Authorization: token, // Her istek için token'ı ekleyin
+      },
+    });
     dispatch({ type: 'FETCH_ADDRESSES_SUCCESS', payload: response.data });
   } catch (error) {
     dispatch({ type: 'FETCH_ADDRESSES_ERROR', payload: error.response });
   }
 };
 
+
 // Yeni adres ekleme
 export const addAddress = (addressData) => async (dispatch) => {
   try {
-    const response = await axiosInstance.post('/user/address', addressData);
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.post('/user/address', addressData, {
+      headers: {
+        Authorization: token,
+      },
+    });
     dispatch({ type: 'ADD_ADDRESS_SUCCESS', payload: response.data });
   } catch (error) {
     dispatch({ type: 'ADD_ADDRESS_ERROR', payload: error.response });
   }
 };
 
+
 // Adres güncelleme
 export const updateAddress = (addressId, addressData) => async (dispatch) => {
   try {
-    const response = await axiosInstance.put(`/user/address/${addressId}`, addressData);
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.put(`/user/address/${addressId}`, addressData, {
+      headers: {
+        Authorization: token,
+      },
+    });
     dispatch({ type: 'UPDATE_ADDRESS_SUCCESS', payload: response.data });
   } catch (error) {
     dispatch({ type: 'UPDATE_ADDRESS_ERROR', payload: error.response });
   }
 };
+
+
+export const deleteAddress = (addressId) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.delete(`/user/address/${addressId}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    dispatch({ type: 'DELETE_ADDRESS_SUCCESS', payload: addressId });
+  } catch (error) {
+    dispatch({ type: 'DELETE_ADDRESS_ERROR', payload: error.response });
+  }
+};
+
+
+// Yeni adres ekleme işlemi başarılı olduktan sonra adres listesini yeniden fetch eden işlem
+export const addAddressAndUpdateList = (addressData) => async (dispatch) => {
+  try {
+    await dispatch(addAddress(addressData));
+    await dispatch(fetchAddresses()); // Başarıyla adres eklendikten sonra listeyi güncelle
+  } catch (error) {
+    console.error("Adres ekleme veya listeyi güncelleme sırasında hata oluştu", error);
+  }
+};
+
 
 export const incrementProductCount = (productId) => {
     return {
@@ -93,3 +137,8 @@ export const toggleProductChecked = (productId) => {
       payload: productId
   };
 };
+
+export const confirmCart = (cartDetails) => ({
+  type: 'CONFIRM_CART',
+  payload: cartDetails,
+});

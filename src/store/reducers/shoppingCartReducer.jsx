@@ -15,6 +15,7 @@ const initialState = {
   payment: {}, // Ödeme bilgisi
   addressList: [], // Kullanıcının kaydedilmiş adresleri
   currentAddress: {}, // Seçili veya yeni eklenen adres
+  cartDetails: {}, // 
 };
 
 export const shoppingCartReducer = (state = initialState, action) => {
@@ -29,6 +30,11 @@ export const shoppingCartReducer = (state = initialState, action) => {
       return { ...state, addressList: action.payload };
     case ADD_ADDRESS_SUCCESS:
       return { ...state, addressList: [...state.addressList, action.payload], currentAddress: action.payload };
+    case 'CONFIRM_CART':
+      return {
+        ...state,
+        cartDetails: action.payload,
+      };
     case UPDATE_ADDRESS_SUCCESS:
       const updatedAddressList = state.addressList.map(address =>
         address.id === action.payload.id ? action.payload : address

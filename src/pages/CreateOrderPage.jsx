@@ -2,79 +2,97 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../mock/axiosInstance';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { setAddressAction, fetchAddresses } from '../store/actions/shoppingCartAction';
+import { fetchAddresses, addAddress, deleteAddress, addAddressAndUpdateList} from '../store/actions/shoppingCartAction';
+
 
 const CreateOrderPage = () => {
-    
-    const [address, setAddress] = useState('');
-    const dispatch = useDispatch();
-    const history = useHistory();
-    
-    const [totalPrice, setTotalPrice] = useState(0);
-    const [isEligibleForFreeShipping, setIsEligibleForFreeShipping] = useState(false);
-    const [shippingCost, setShippingCost] = useState(29.99);
-    const [grandTotal, setGrandTotal] = useState(0);
-    const [discountCode, setDiscountCode] = useState('');
-    const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const [showAddAddressForm, setShowAddAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    title: '',
+    name: '',
+    surname: '',
+    phone: '',
+    city: '',
+    district: '',
+    neighborhood: '',
+    address: '',
+  });
+  
+  const { addressList, totalPrice, shippingCost,} = useSelector((state) => state.shoppingCart);
+  const cartDetails = useSelector((state) => state.shoppingCart.cartDetails);
+  const [isEligibleForFreeShipping, setEligibleForFreeShipping] = useState(false);
 
-    const cartItems = useSelector(state => state.shoppingCart.cartList);
-    const [activeTab, setActiveTab] = useState('address');
-    
 
-    const handleAddressChange = (event) => {
-        setAddress(event.target.value);
+  useEffect(() => {
+    dispatch(fetchAddresses());
+    // totalPrice 150'den büyükse, kullanıcı ücretsiz kargoya uygun olur
+    setEligibleForFreeShipping(totalPrice > 150);
+  }, [dispatch, totalPrice]);  
+
+  const handleChange = (e) => {
+    setNewAddress({ ...newAddress, [e.target.name]: e.target.value });
+  };
+
+  const handleAddNewAddress = (e) => {
+    e.preventDefault();
+    const formattedAddress = {
+      address_title: newAddress.title,
+      name: newAddress.name,
+      surname: newAddress.surname,
+      phone: newAddress.phone,
+      city: newAddress.city,
+      district: newAddress.district,
+      neighborhood: newAddress.neighborhood,
+      address: newAddress.address,
     };
+    // addAddress yerine addAddressAndUpdateList action'ını dispatch edin
+    dispatch(addAddressAndUpdateList(formattedAddress));
+    setShowAddAddressForm(false);
+  };
 
-    const handleConfirmCart = () => {
-        // Sepeti onaylama ve ödeme sayfasına yönlendirme işlemi
-        history.push('/payment-options');
-    };
-
-    const [showAddAddressForm, setShowAddAddressForm] = useState(false);
-    const [addressList, setAddressList] = useState([]);
-    const [selectedAddress, setSelectedAddress] = useState(null);
-
-
-    useEffect(() => {
-        const newTotalPrice = cartItems.reduce((total, item) => total + (item.count * item.product.price), 0);
-        setTotalPrice(newTotalPrice);
-
-        const eligibleForFreeShipping = newTotalPrice >= 150;
-        setIsEligibleForFreeShipping(eligibleForFreeShipping);
-        setShippingCost(eligibleForFreeShipping ? 0 : 29.99);
-
-        const calculatedGrandTotal = eligibleForFreeShipping ? newTotalPrice : newTotalPrice + shippingCost;
-        setGrandTotal(calculatedGrandTotal);
-    }, [cartItems, shippingCost]);
-
-    const handleDiscountCodeSubmit = () => {
-        setIsCodeSubmitted(true);
-        // Discount code validation logic can be implemented here.
-    };
-
-    useEffect(() => {
-        const loadAddresses = async () => {
-            dispatch(fetchAddresses());
-        };
-        loadAddresses();
-    }, [dispatch]);
-
-    return (
-        <div className="container mx-auto flex flex-wrap my-10">
-            <div className="flex flex-col md:mx-auto w-full md:w-3/4">
-                {/* Adres Bilgileri Kartı */}
-                <div className="flex">
-                    <div className={`w-full md:w-1/2 p-4 ${activeTab === 'address' ? 'bg-blue-100' : 'bg-gray-100'} cursor-pointer`} onClick={() => setActiveTab('address')}>
-                        <h2 className="text-xl font-bold mb-3">Adres Bilgileri</h2>
-                        {/* Adres bilgileri içeriği */}
-                    </div>
-                <div className={`w-full md:w-1/2 p-4 ${activeTab === 'payment' ? 'bg-blue-100' : 'bg-gray-100'} cursor-pointer`} onClick={() => setActiveTab('payment')}>
-                        <h2 className="text-xl font-bold mb-3">Ödeme Seçenekleri</h2>
-                        <h3 className="text-xs text-gray-500">Banka/Kredi Kartı veya Alışveriş Kredisi ile ödemenizi güvenle yapabilirsiniz.</h3>
-                    </div>
-                </div>
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex flex-wrap">
+        <div className="w-full md:w-3/4 p-4">
+          <div className="mb-4">
+            <button onClick={() => setShowAddAddressForm(!showAddAddressForm)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              {showAddAddressForm ? 'Cancel' : 'Add New Address'}
+            </button>
+          </div>
+          {showAddAddressForm && (
+            <form onSubmit={handleAddNewAddress}>
+              <input type="text" name="title" placeholder="Adres Başlığı" onChange={handleChange} value={newAddress.title} />
+              <input type="text" name="name" placeholder="Ad" onChange={handleChange} value={newAddress.name} />
+              <input type="text" name="surname" placeholder="Soyad" onChange={handleChange} value={newAddress.surname} />
+              <input type="text" name="phone" placeholder="Telefon Numarası" onChange={handleChange} value={newAddress.phone} />
+              <select name="city" onChange={handleChange} value={newAddress.city}>
+                <option value="">Şehir Seçiniz</option>
+                {/* Şehir seçenekleri */}
+              </select>
+              <input type="text" name="district" placeholder="İlçe" onChange={handleChange} value={newAddress.district} />
+              <input type="text" name="neighborhood" placeholder="Mahalle" onChange={handleChange} value={newAddress.neighborhood} />
+              <textarea name="address" placeholder="Adres" onChange={handleChange} value={newAddress.address}></textarea>
+              <button type="submit">Adres Ekle</button>
+            </form>
+          )}
+          {addressList.map((address, index) => (
+            <div key={index} className="p-4 mb-4 bg-white rounded shadow">
+              <div className="mb-2">
+                <strong>Title:</strong> {address.title || 'N/A'}
+              </div>
+              {/* Display other address details */}
+              <div><strong>Name:</strong> {address.name || 'N/A'} {address.surname || ''}</div>
+              <div><strong>Phone:</strong> {address.phone || 'N/A'}</div>
+              <div><strong>City:</strong> {address.city || 'N/A'}</div>
+              <div><strong>District:</strong> {address.district || 'N/A'}</div>
+              <div><strong>Neighborhood:</strong> {address.neighborhood || 'N/A'}</div>
+              <div><strong>Address:</strong> {address.address || 'N/A'}</div>
             </div>
-            <div className="w-full md:w-1/4 p-4">
+          ))}
+        </div>
+        <div className="w-full md:w-1/4 p-4">
                 <div className="bg-white shadow rounded h-auto sticky top-0">
                     <div className="p-4">
                         <h3 className="text-xl font-bold mb-2">Sipariş Özeti</h3>
@@ -82,19 +100,21 @@ const CreateOrderPage = () => {
                         <div className="mt-4">
                             <div className="flex justify-between py-2 text-gray-600">
                                 <span>Ürün Toplamı</span>
-                                <span>{totalPrice.toFixed(2)} TL</span>
+                                <span>{cartDetails.totalPrice.toFixed(2)} TL</span>
                             </div>
                             <div className="flex justify-between py-2 text-gray-600">
                                 <span>Kargo Toplam</span>
-                                <span>{isEligibleForFreeShipping ? 'Ücretsiz' : `${shippingCost.toFixed(2)} TL`}</span>
+                                <span>{cartDetails.isEligibleForFreeShipping ? 'Ücretsiz' : `${cartDetails.shippingCost.toFixed(2)} TL`}</span>{/* Kargo ücreti */}
                             </div>
+                            {cartDetails.isEligibleForFreeShipping && (
+                              <div className="flex justify-between py-2 text-green-600">
+                                <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
+                                <span>-{cartDetails.shippingCost.toFixed(2)} TL</span>
+                              </div>
+                            )}
                             <div className="flex justify-between py-2 text-gray-900 font-bold">
-                                <span>Toplam</span>
-                                <span>{grandTotal.toFixed(2)} TL</span>
-                            </div>
-                            <div className="flex justify-between py-2 text-green-600">
-                                <span>150 TL ve Üzeri <br />Kargo Bedava br(Satıcı Karşılar)</span>
-                                <span>-{shippingCost.toFixed(2)} TL</span>
+                              <span>Toplam</span>
+                              <span>{(cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)).toFixed(2)} TL</span>
                             </div>
                             {/* Discount code input and confirmation button */}
                         </div>
@@ -105,11 +125,10 @@ const CreateOrderPage = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-    );
+              </div>
+      </div>
+    </div>
+  );
 };
 
 export default CreateOrderPage;
-

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { incrementProductCount, decrementProductCount, removeFromCart, toggleProductChecked } from '../store/actions/shoppingCartAction';
 import { useHistory } from 'react-router-dom';
+import { confirmCart } from '../store/actions/shoppingCartAction';
 
 
 const getRandomSize = () => {
@@ -48,7 +49,20 @@ const ShoppingCartPage = () => {
     };
 
     const handleConfirmCart = () => {
+        const cartDetails = {
+            totalPrice, // Ürün toplamı
+            isEligibleForFreeShipping, // Ücretsiz kargo uygunluğu
+            shippingCost, // Kargo toplamı
+            grandTotal: totalPrice + (!isEligibleForFreeShipping ? shippingCost : 0), // Toplam tutar
+            discountCode, // İndirim kodu (eğer uygulandıysa)
+        };
+        dispatch(confirmCart(cartDetails));
         history.push('/create-order');
+        const cartDetailsSafe = cartDetails || {
+            totalPrice: 0,
+            shippingCost: 0,
+            isEligibleForFreeShipping: false
+        };
     };
 
     return (
