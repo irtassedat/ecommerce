@@ -3,7 +3,7 @@ import axiosInstance from '../mock/axiosInstance';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { fetchAddresses, addAddress, deleteAddress, addAddressAndUpdateList, updateAddress} from '../store/actions/shoppingCartAction';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const CreateOrderPage = () => {
   const dispatch = useDispatch();
@@ -87,16 +87,16 @@ const CreateOrderPage = () => {
     <div className="container mx-auto p-6">
       <div className="flex flex-wrap">
         <div className="w-full md:w-3/4 p-4">
-          <div class="mb-6 md:mr-4 md:w-1/2">
-            <div class="mb-4">
-                <h2 class="text-xl font-semibold mb-3">Adres Bilgileri</h2>
-          <div className="mb-4">
-            <button onClick={() => setShowAddAddressForm(!showAddAddressForm)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              {showAddAddressForm ? 'Cancel' : 'Add New Address'}
-            </button>
-          </div>
+          <div class="flex flex-col">
+            <div class=" mb-6 p-6 bg-white rounded shadow flex flex-col ">
+                <h2 class="text-xl font-semibold mb-3">Teslimat Adresi</h2>
+                <div onClick={() => { setShowAddAddressForm(true); setIsEditing(false); }} className="p-4 mb-4 bg-white rounded shadow cursor-pointer flex justify-center items-center flex-col">
+                  <div className="text-3xl">+</div>
+                  <div className="text-md mt-2">Add New Address</div>
+                </div>
           { (showAddAddressForm || isEditing) && (
-            <form onSubmit={isEditing ? handleSaveEditedAddress : handleAddNewAddress} className="space-y-4">
+          <div className="flex flex-col md:flex-row">
+            <form onSubmit={isEditing ? handleSaveEditedAddress : handleAddNewAddress} className="space-y-4 md:w-1/2">
               <input type="text" name="title" placeholder="Adres Başlığı" onChange={handleChange} value={newAddress.title} className="border rounded p-2 w-full" />
               <input type="text" name="name" placeholder="Ad" onChange={handleChange} value={newAddress.name} className="border rounded p-2 w-full"/>
               <input type="text" name="surname" placeholder="Soyad" onChange={handleChange} value={newAddress.surname}className="border rounded p-2 w-full" />
@@ -108,17 +108,32 @@ const CreateOrderPage = () => {
               <input type="text" name="district" placeholder="İlçe" onChange={handleChange} value={newAddress.district} />
               <input type="text" name="neighborhood" placeholder="Mahalle" onChange={handleChange} value={newAddress.neighborhood} />
               <textarea name="address" placeholder="Adres" onChange={handleChange} value={newAddress.address}></textarea>
-              <button type="submit">{isEditing ? 'Düzenlemeyi Kaydet' : 'Adres Ekle'}</button>
-            </form>
-          )}
-          {addressList.map((address, index) => (
-            <div key={index} className="p-4 mb-4 bg-white rounded shadow ">
               <div className="flex justify-between items-center">
-                <strong>Title:</strong> {address.title || 'N/A'}  
+                <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                  {isEditing ? 'Düzenlemeyi Kaydet' : 'Adres Ekle'}
+                </button>
+                <button onClick={() => { setShowAddAddressForm(false); setIsEditing(false); }} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                  İptal
+                </button>
               </div>
+            </form>
+          </div>
+          )}
+          <div class="flex flex-wrap ">
+          {addressList.map((address, index) => (
+            <div key={index} className="relative p-4 mb-10 w-1/2 bg-white rounded shadow">
+              <input type="checkbox" className="form-checkbox h-5 w-5 absolute top-0 left-0 mt-2 ml-2" />
               {/* Display other address details */}
-              <div><strong>Name:</strong> {address.name || 'N/A'} {address.surname || ''}</div>
-              <div><strong>Phone:</strong> {address.phone || 'N/A'}</div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <i className="fas fa-user-circle text-lg text-gray-400"></i> {/* Profil ikonu */}
+                  <span className="ml-2 text-gray-500">{address.name} {address.surname}</span> {/* Ad ve soyad bilgileri */}
+                </div>
+                <span className="flex items-center text-xs font-semibold text-orange-600 bg-orange-200 rounded-full px-2 py-1">
+                  <i className="fas fa-phone-alt mr-1"></i> {/* Telefon ikonu */}
+                  {address.phone}
+                </span>
+              </div>
               <div><strong>City:</strong> {address.city || 'N/A'}</div>
               <div><strong>District:</strong> {address.district || 'N/A'}</div>
               <div><strong>Neighborhood:</strong> {address.neighborhood || 'N/A'}</div>
@@ -133,6 +148,7 @@ const CreateOrderPage = () => {
               </div>
             </div>
           ))}
+        </div>
         </div>
         </div>
         </div>
