@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../mock/axiosInstance';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { fetchAddresses, addAddress, deleteAddress, addAddressAndUpdateList} from '../store/actions/shoppingCartAction';
+import { fetchAddresses, addAddress, deleteAddress, addAddressAndUpdateList, updateAddress} from '../store/actions/shoppingCartAction';
 
 
 const CreateOrderPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [newAddress, setNewAddress] = useState({
     title: '',
     name: '',
@@ -38,7 +40,7 @@ const CreateOrderPage = () => {
   const handleAddNewAddress = (e) => {
     e.preventDefault();
     const formattedAddress = {
-      address_title: newAddress.title,
+      title: newAddress.title,
       name: newAddress.name,
       surname: newAddress.surname,
       phone: newAddress.phone,
@@ -52,35 +54,67 @@ const CreateOrderPage = () => {
     setShowAddAddressForm(false);
   };
 
+  const handleDeleteAddress = (addressId) => {
+    // Adres silme işlemi için Redux action'ı dispatch et
+    dispatch(deleteAddress(addressId));
+  };
+
+  const handleEditAddressClick = (address) => {
+    // Adres bilgilerini form alanlarına doldur
+    setNewAddress(address);
+    // Düzenleme modunu ve form görünümünü etkinleştir
+    setIsEditing(true);
+    setShowAddAddressForm(true);
+    setEditingAddressId(address.id);  
+  };
+  
+  
+
+  const handleSaveEditedAddress = async (e) => {
+    e.preventDefault();
+    // Yeni adres bilgileriyle updateAddress action'ını çağır
+    await dispatch(updateAddress(editingAddressId, newAddress));
+    setIsEditing(false);
+    setEditingAddressId(null);
+    setShowAddAddressForm(false);
+    // Adres listesini yenilemek için fetchAddresses çağrılabilir veya kullanıcıyı adres listesine yönlendirebilirsiniz
+    dispatch(fetchAddresses());
+  };
+
+  
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-wrap">
         <div className="w-full md:w-3/4 p-4">
+          <div class="mb-6 md:mr-4 md:w-1/2">
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold mb-3">Adres Bilgileri</h2>
           <div className="mb-4">
             <button onClick={() => setShowAddAddressForm(!showAddAddressForm)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               {showAddAddressForm ? 'Cancel' : 'Add New Address'}
             </button>
           </div>
-          {showAddAddressForm && (
-            <form onSubmit={handleAddNewAddress}>
-              <input type="text" name="title" placeholder="Adres Başlığı" onChange={handleChange} value={newAddress.title} />
-              <input type="text" name="name" placeholder="Ad" onChange={handleChange} value={newAddress.name} />
-              <input type="text" name="surname" placeholder="Soyad" onChange={handleChange} value={newAddress.surname} />
-              <input type="text" name="phone" placeholder="Telefon Numarası" onChange={handleChange} value={newAddress.phone} />
-              <select name="city" onChange={handleChange} value={newAddress.city}>
+          { (showAddAddressForm || isEditing) && (
+            <form onSubmit={isEditing ? handleSaveEditedAddress : handleAddNewAddress} className="space-y-4">
+              <input type="text" name="title" placeholder="Adres Başlığı" onChange={handleChange} value={newAddress.title} className="border rounded p-2 w-full" />
+              <input type="text" name="name" placeholder="Ad" onChange={handleChange} value={newAddress.name} className="border rounded p-2 w-full"/>
+              <input type="text" name="surname" placeholder="Soyad" onChange={handleChange} value={newAddress.surname}className="border rounded p-2 w-full" />
+              <input type="text" name="phone" placeholder="Telefon Numarası" onChange={handleChange} value={newAddress.phone}className="border rounded p-2 w-full" />
+              <select name="city" onChange={handleChange} value={newAddress.city} className="border rounded p-2 w-full">
                 <option value="">Şehir Seçiniz</option>
                 {/* Şehir seçenekleri */}
               </select>
               <input type="text" name="district" placeholder="İlçe" onChange={handleChange} value={newAddress.district} />
               <input type="text" name="neighborhood" placeholder="Mahalle" onChange={handleChange} value={newAddress.neighborhood} />
               <textarea name="address" placeholder="Adres" onChange={handleChange} value={newAddress.address}></textarea>
-              <button type="submit">Adres Ekle</button>
+              <button type="submit">{isEditing ? 'Düzenlemeyi Kaydet' : 'Adres Ekle'}</button>
             </form>
           )}
           {addressList.map((address, index) => (
-            <div key={index} className="p-4 mb-4 bg-white rounded shadow">
-              <div className="mb-2">
-                <strong>Title:</strong> {address.title || 'N/A'}
+            <div key={index} className="p-4 mb-4 bg-white rounded shadow ">
+              <div className="flex justify-between items-center">
+                <strong>Title:</strong> {address.title || 'N/A'}  
               </div>
               {/* Display other address details */}
               <div><strong>Name:</strong> {address.name || 'N/A'} {address.surname || ''}</div>
@@ -89,8 +123,18 @@ const CreateOrderPage = () => {
               <div><strong>District:</strong> {address.district || 'N/A'}</div>
               <div><strong>Neighborhood:</strong> {address.neighborhood || 'N/A'}</div>
               <div><strong>Address:</strong> {address.address || 'N/A'}</div>
+              <div className="flex space-x-2 py-2">
+              <button onClick={() => handleEditAddressClick(address)} className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-3 rounded">
+                Düzenle
+              </button>
+              <button onClick={() => handleDeleteAddress(address.id)} className="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 rounded">
+                Sil
+              </button>
+              </div>
             </div>
           ))}
+        </div>
+        </div>
         </div>
         <div className="w-full md:w-1/4 p-4">
                 <div className="bg-white shadow rounded h-auto sticky top-0">

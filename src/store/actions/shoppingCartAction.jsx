@@ -63,7 +63,7 @@ export const addAddress = (addressData) => async (dispatch) => {
 export const updateAddress = (addressId, addressData) => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axiosInstance.put(`/user/address/${addressId}`, addressData, {
+    const response = await axiosInstance.put(`/user/address/`, addressData, {
       headers: {
         Authorization: token,
       },
