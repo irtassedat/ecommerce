@@ -53,6 +53,7 @@ export const addAddress = (addressData) => async (dispatch) => {
       },
     });
     dispatch({ type: 'ADD_ADDRESS_SUCCESS', payload: response.data });
+    dispatch(setAddressAction(response.data[0])); // Eğer API diziyi döndürüyorsa ve güncellenen adres ilk eleman ise
   } catch (error) {
     dispatch({ type: 'ADD_ADDRESS_ERROR', payload: error.response });
   }
@@ -69,6 +70,7 @@ export const updateAddress = (addressId, addressData) => async (dispatch) => {
       },
     });
     dispatch({ type: 'UPDATE_ADDRESS_SUCCESS', payload: response.data });
+    dispatch(setAddressAction(response.data[0])); // Eğer API diziyi döndürüyorsa ve güncellenen adres ilk eleman ise
   } catch (error) {
     dispatch({ type: 'UPDATE_ADDRESS_ERROR', payload: error.response });
   }
@@ -84,6 +86,7 @@ export const deleteAddress = (addressId) => async (dispatch) => {
       },
     });
     dispatch({ type: 'DELETE_ADDRESS_SUCCESS', payload: addressId });
+    dispatch(fetchAddresses());
   } catch (error) {
     dispatch({ type: 'DELETE_ADDRESS_ERROR', payload: error.response });
   }
