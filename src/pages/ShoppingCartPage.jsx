@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { incrementProductCount, decrementProductCount, removeFromCart, toggleProductChecked } from '../store/actions/shoppingCartAction';
 import { useHistory } from 'react-router-dom';
-
+import { confirmCart } from '../store/actions/shoppingCartAction';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // FontAwesomeIcon import ediliyor
+import { faLiraSign } from '@fortawesome/free-solid-svg-icons';
 
 const getRandomSize = () => {
     const sizes = Array.from({ length: 9 }, (_, i) => 24 + i * 2); // 24'ten 40'a kadar 2'şerli
@@ -47,10 +49,26 @@ const ShoppingCartPage = () => {
         history.push('/shop');
     };
 
+    const handleConfirmCart = () => {
+        const cartDetails = {
+            totalPrice, // Ürün toplamı
+            isEligibleForFreeShipping, // Ücretsiz kargo uygunluğu
+            shippingCost, // Kargo toplamı
+            grandTotal: totalPrice + (!isEligibleForFreeShipping ? shippingCost : 0), // Toplam tutar
+            discountCode, // İndirim kodu (eğer uygulandıysa)
+        };
+        dispatch(confirmCart(cartDetails));
+        history.push('/create-order');
+        const cartDetailsSafe = cartDetails || {
+            totalPrice: 0,
+            shippingCost: 0,
+            isEligibleForFreeShipping: false
+        };
+    };
 
     return (
-        <div className="container mx-auto mt-10">
-            <div className="flex shadow-md my-10 bg-white rounded-lg overflow-hidden">
+        <div className="container x mx-auto mt-10">
+            <div className="flex shadow-md my-10 bg-white rounded-lg">
                 <div className="w-3/4 p-10">
                     <h1 className="font-semibold text-4xl mb-8">Sepetim ({cartItems.length} Ürün)</h1>
                     {cartItems.map((item, index) => (
@@ -74,61 +92,66 @@ const ShoppingCartPage = () => {
                                 </div>
                             </div>
                             <div className="flex flex-wrap justify-center items-center w-1/3">
-                                <button onClick={() => dispatch(decrementProductCount(item.product.id))} className="text-white bg-red-500 hover:bg-red-600 font-bold py-1 px-3 rounded">-</button>
+                                <button onClick={() => dispatch(decrementProductCount(item.product.id))} className="text-white bg-red-600 hover:bg-red-800 font-bold py-1 px-3 rounded">-</button>
                                 <span className="mx-3 border p-2 rounded">{item.count}</span>
-                                <button onClick={() => dispatch(incrementProductCount(item.product.id))} className="text-white bg-green-500 hover:bg-green-600 font-bold py-1 px-3 rounded">+</button>
+                                <button onClick={() => dispatch(incrementProductCount(item.product.id))} className="text-white bg-[#2A7CC7] hover:bg-blue-800 font-bold py-1 px-3 rounded">+</button>
                             </div>
-                            <div className="mx-2 text-lg font-semibold text-orange-500">{item.product.price.toFixed(2)} TL</div>
+                            <div className="mx-2 text-lg font-semibold text-orange-500 flex items-center">
+                                  <span>{item.product.price.toFixed(2)}</span>
+                                  <FontAwesomeIcon icon={faLiraSign} className="ml-2" />
+                            </div>
                         </div>
                     ))}
                 </div>
-                <div className="w-1/4 bg-gray-100 px-8 py-10">
-                    <h1 className="font-semibold text-2xl border-b pb-8">Sipariş Özeti</h1>
-                    <div className="mt-10">
-                        <div className="flex justify-between py-2 text-gray-600">
-                            <span>Ürün Toplamı</span>
-                            <span>{totalPrice.toFixed(2)} TL</span>
-                        </div>
-                        <div className="flex justify-between py-2 text-gray-600">
-                            <span>Kargo Toplam</span>
-                            <span>{isEligibleForFreeShipping ? 'Ücretsiz' : `${shippingCost.toFixed(2)} TL`}</span>
-                        </div>
-                        {isEligibleForFreeShipping && (
-                            <div className="flex justify-between py-2 text-green-600">
-                                <span>150 TL ve Üzeri <br />Kargo Bedava br(Satıcı Karşılar)</span>
-                                <span>-{shippingFee.toFixed(2)} TL</span>
+                <div className="w-1/4 bg-gray-100 px-8 py-4">
+                     <div className="h-auto sticky top-20">
+                        <h1 className="font-semibold text-2xl border-b p-4 mt-10">Sipariş Özeti</h1>
+                        <div className="mt-10 p-4">
+                            <div className="flex justify-between py-2 text-gray-600">
+                                <span>Ürün Toplamı</span>
+                                <span>{totalPrice.toFixed(2)} TL</span>
                             </div>
-                        )}
-                        <div className="flex justify-between py-2 text-gray-900 font-bold">
-                            <span>Toplam</span>
-                            <span>{grandTotal.toFixed(2)} TL</span>
-                        </div>
-                        <div className="mt-8">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="discount-code">İndirim Kodu Gir</label>
-                            <input
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                id="discount-code"
-                                type="text"
-                                placeholder="Kodu buraya giriniz"
-                                value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value)}
-                            />
-                            {!isCodeSubmitted && discountCode && (
-                                <button
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3 w-full"
-                                    onClick={handleDiscountCodeSubmit}
-                                >
-                                    Kodu Onayla
-                                </button>
+                            <div className="flex justify-between py-2 text-gray-600">
+                                <span>Kargo Toplam</span>
+                                <span>{isEligibleForFreeShipping ? 'Ücretsiz' : `${shippingCost.toFixed(2)} TL`}</span>
+                            </div>
+                            {isEligibleForFreeShipping && (
+                                <div className="flex justify-between py-2 text-green-600">
+                                    <span>150 TL ve Üzeri <br />Kargo Bedava br(Satıcı Karşılar)</span>
+                                    <span>-{shippingFee.toFixed(2)} TL</span>
+                                </div>
                             )}
-                        </div>
-                        <div className="mt-4">
-                            <button className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
-                                Sepeti Onayla
-                            </button>
-                            <button onClick={handleContinueShopping} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
-                                Alışverişe Devam Et
-                            </button>
+                            <div className="flex justify-between py-2 text-gray-900 font-bold">
+                                <span>Toplam</span>
+                                <span>{grandTotal.toFixed(2)} TL</span>
+                            </div>
+                            <div className="mt-8">
+                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="discount-code">İndirim Kodu Gir</label>
+                                <input
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    id="discount-code"
+                                    type="text"
+                                    placeholder="Kodu buraya giriniz"
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value)}
+                                />
+                                {!isCodeSubmitted && discountCode && (
+                                    <button
+                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-3 w-full"
+                                        onClick={handleDiscountCodeSubmit}
+                                    >
+                                        Kodu Onayla
+                                    </button>
+                                )}
+                            </div>
+                            <div className="mt-4">
+                                <button onClick={handleConfirmCart} className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
+                                    Sepeti Onayla
+                                </button>
+                                <button onClick={handleContinueShopping} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
+                                    Alışverişe Devam Et
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

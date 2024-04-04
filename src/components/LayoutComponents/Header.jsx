@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState,} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearUser } from '../../store/actions/userActions';
 import { toast } from 'react-toastify';
@@ -65,6 +65,10 @@ export default function Header() {
 
     // Sepetteki toplam ürün sayısını hesapla
     const totalCartItems = cartItems.reduce((total, item) => total + item.count, 0);
+
+    const handleCompleteOrder = () => {
+        history.push('/create-order'); // Kullanıcıyı CreateOrderPage sayfasına yönlendir
+    };
 
     return (
         <>
@@ -143,18 +147,18 @@ export default function Header() {
                                                     <div className="text-sm text-slate-950/25">{item.product.description}</div>
                                                     <div className="font-bold text-base text-orange-600 mt-1.5">{item.product.price * item.count} TL</div>
                                                     <div className="flex items-center mt-3">
-                                                        <span className="text-gray-700 mr-4    ">Adet:</span>
+                                                        <span className="text-gray-700 mr-6    ">Adet:</span>
                                                         <button onClick={(event) => {
                                                             event.stopPropagation();
                                                             dispatch(decrementProductCount(item.product.id));
-                                                        }} className="text-white bg-red-500 hover:bg-red-600 font-bold py-1 px-3 rounded">
+                                                        }} className="text-white bg-red-600 hover:bg-red-800 font-bold py-1 px-2.5 rounded">
                                                             -
                                                         </button>
                                                         <span className="mx-2">{item.count}</span>
                                                         <button onClick={(event) => {
                                                             event.stopPropagation();
                                                             dispatch(incrementProductCount(item.product.id));
-                                                        }} className="text-white bg-green-500 hover:bg-green-600 font-bold py-1 px-3 rounded">
+                                                        }} className="text-white bg-[#2A7CC7] hover:bg-blue-700 font-bold py-1 px-2.5 rounded">
                                                             +
                                                         </button>
                                                     </div>
@@ -164,10 +168,10 @@ export default function Header() {
                                         
                                     </div>
                                     <div className="p-4 flex justify-between items-center">
-                                        <Link to="/shopping-cart" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3.5 px-11 rounded">
+                                        <Link to="/shopping-cart" className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-3.5 px-11 rounded">
                                             Sepete Git
                                         </Link>
-                                        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-4 rounded">
+                                        <button onClick={handleCompleteOrder} className="bg-[#2A7CC7] hover:bg-blue-800 text-white font-bold py-3.5 px-4 rounded">
                                             Siparişi Tamamla
                                         </button>
                                     </div>

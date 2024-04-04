@@ -1,6 +1,7 @@
 // src/axiosInstance.js
 import Axios from 'axios';
 
+
 const axiosInstance = Axios.create({
   baseURL: 'https://workintech-fe-ecommerce.onrender.com',
 });

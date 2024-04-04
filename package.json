@@ -39,6 +39,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^3.1.0",
     "slick-carousel": "^1.8.1",
+    "turkey-neighbourhoods": "^3.1.0",
     "use-gravatar": "^1.0.1"
   },
   "devDependencies": {
