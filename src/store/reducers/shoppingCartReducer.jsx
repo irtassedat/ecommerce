@@ -12,6 +12,8 @@ export const UPDATE_ADDRESS_SUCCESS = "UPDATE_ADDRESS_SUCCESS";
 export const FETCH_PROVINCES_SUCCESS = "FETCH_PROVINCES_SUCCESS";
 export const FETCH_DISTRICTS_SUCCESS = "FETCH_DISTRICTS_SUCCESS";
 export const FETCH_NEIGHBORHOODS_SUCCESS = "FETCH_NEIGHBORHOODS_SUCCESS";
+export const DELETE_ADDRESS_SUCCESS = "DELETE_ADDRESS_SUCCESS";
+
 
 const initialState = {
   cartList: [], // Alışveriş sepetindeki ürünler
@@ -98,6 +100,13 @@ export const shoppingCartReducer = (state = initialState, action) => {
             : item
         ),
       };
+    case DELETE_ADDRESS_SUCCESS:
+      const isCurrentAddressDeleted = state.currentAddress.id === action.payload;
+      return {
+        ...state,
+        addressList: state.addressList.filter(address => address.id !== action.payload),
+        currentAddress: isCurrentAddressDeleted ? {} : state.currentAddress,
+      };      
     default:
       return state;
   }

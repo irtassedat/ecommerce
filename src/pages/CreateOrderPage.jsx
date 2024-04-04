@@ -89,8 +89,13 @@ const CreateOrderPage = () => {
   };
 
   const handleDeleteAddress = (addressId) => {
+    if (addressId === selectedAddressId) {
+      setSelectedAddressId(null); // Seçimi kaldır
+      dispatch(setAddressAction({})); // Redux state'ini sıfırla
+    }
     dispatch(deleteAddress(addressId));
   };
+  
 
   const handleEditAddressClick = (address) => {
     setNewAddress(address);
@@ -115,9 +120,12 @@ const CreateOrderPage = () => {
     setShowAddAddressForm(false);
     dispatch(fetchAddresses());
   };
-  const handleSelectAddress = (address) => {
-    dispatch(setAddressAction(address));
+  const handleSelectAddress = (selectedId) => {
+    setSelectedAddressId(selectedId); 
+    const selectedAddress = addressList.find(address => address.id === selectedId);
+    dispatch(setAddressAction(selectedAddress));
   };
+  
 
   
   const cityOptions = getCities();
@@ -125,12 +133,18 @@ const CreateOrderPage = () => {
   const neighborhoodOptions = newAddress.district ? getNeighbourhoodsByCityCodeAndDistrict(newAddress.city, newAddress.district) : [];
 
   const handleSaveAndContinue = () => {
-    if (!currentAddress) {
+    console.log("handleSaveAndContinue başladı", currentAddress);
+  
+    if (!selectedAddressId) {
       toast.error("Lütfen devam etmek için bir adres seçin.");
       return;
-    }
+    }    
+  
+    console.log("Ödeme seçeneklerine geçiliyor");
     setActiveTab('paymentOptions');
+    console.log("setActiveTab çağrıldı");
   };
+  
   
 
   const renderAddressInfo = () => {
@@ -222,8 +236,8 @@ const CreateOrderPage = () => {
                       type="radio"
                       name="selectedAddress"
                       value={address.id}
-                      onChange={() => handleSelectAddress(address)}
-                      checked={currentAddress?.id === address.id}
+                      onChange={() => handleSelectAddress(address.id)}
+                      checked={currentAddress && currentAddress.id === address.id}
                       className="form-radio h-4 w-4 oppacity-500"
                     />
                     {console.log("Radio checked durumu: ", currentAddress?.id === address.id, "Adres ID: ", address.id)}
