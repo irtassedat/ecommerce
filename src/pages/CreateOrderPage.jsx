@@ -131,12 +131,15 @@ const CreateOrderPage = () => {
   const cityOptions = getCities();
   const districtOptions = newAddress.city ? getDistrictsByCityCode(newAddress.city) : [];
   const neighborhoodOptions = newAddress.district ? getNeighbourhoodsByCityCodeAndDistrict(newAddress.city, newAddress.district) : [];
+  
+  const paymentTabClassName = `px-10 py-4 ${activeTab === 'paymentOptions' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-tr-lg ${!selectedAddressId ? 'cursor-not-allowed opacity-50' : ''}`;
+
 
   const handleSaveAndContinue = () => {
     console.log("handleSaveAndContinue başladı", currentAddress);
   
     if (!selectedAddressId) {
-      toast.error("Lütfen devam etmek için bir adres seçin.");
+      toast.error("Lütfen ödeme seçeneklerine geçmeden önce bir adres seçin..");
       return;
     }    
   
@@ -145,7 +148,21 @@ const CreateOrderPage = () => {
     console.log("setActiveTab çağrıldı");
   };
   
-  
+  const handleTabChangeToPayment = (e) => {
+    e.preventDefault();
+    if (!selectedAddressId) {
+      toast.error("Lütfen ödeme seçeneklerine geçmeden önce bir adres seçin.");
+      return;
+    } else {
+      setActiveTab('paymentOptions');
+    }
+  };
+
+  const handleMouseEnterPaymentTab = () => {
+    if (!selectedAddressId) {
+      toast.info("Ödeme seçeneklerine geçiş yapabilmek için önce bir adres seçmelisiniz.");
+    }
+  };
 
   const renderAddressInfo = () => {
     return (
@@ -292,8 +309,9 @@ const CreateOrderPage = () => {
           Adres Bilgileri
         </button>
           <button
-            onClick={() => setActiveTab('paymentOptions')}
-            className={`px-10 py-4 ${activeTab === 'paymentOptions' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-tr-lg`}>
+            onClick={handleTabChangeToPayment}
+            onMouseEnter={handleMouseEnterPaymentTab}
+            className={paymentTabClassName}>
             Ödeme Seçenekleri
           </button>
         </div>
