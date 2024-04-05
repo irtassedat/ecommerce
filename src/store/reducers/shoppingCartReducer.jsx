@@ -13,6 +13,11 @@ export const FETCH_PROVINCES_SUCCESS = "FETCH_PROVINCES_SUCCESS";
 export const FETCH_DISTRICTS_SUCCESS = "FETCH_DISTRICTS_SUCCESS";
 export const FETCH_NEIGHBORHOODS_SUCCESS = "FETCH_NEIGHBORHOODS_SUCCESS";
 export const DELETE_ADDRESS_SUCCESS = "DELETE_ADDRESS_SUCCESS";
+export const FETCH_CARDS_SUCCESS = "FETCH_CARDS_SUCCESS";
+export const ADD_CARD_SUCCESS = "ADD_CARD_SUCCESS";
+export const UPDATE_CARD_SUCCESS = "UPDATE_CARD_SUCCESS";
+export const DELETE_CARD_SUCCESS = "DELETE_CARD_SUCCESS";
+
 
 
 const initialState = {
@@ -24,6 +29,7 @@ const initialState = {
   provinces: [],
   districts: [],
   neighborhoods: [],
+  cardList: [],
 };
 
 export const shoppingCartReducer = (state = initialState, action) => {
@@ -106,7 +112,21 @@ export const shoppingCartReducer = (state = initialState, action) => {
         ...state,
         addressList: state.addressList.filter(address => address.id !== action.payload),
         currentAddress: isCurrentAddressDeleted ? {} : state.currentAddress,
-      };      
+      };
+    case FETCH_CARDS_SUCCESS:
+      return { ...state, cardList: action.payload };
+    case ADD_CARD_SUCCESS:
+      return { ...state, cardList: [...state.cardList, action.payload] };
+    case UPDATE_CARD_SUCCESS:
+      const updatedCardList = state.cardList.map(card =>
+        card.id === action.payload.id ? action.payload : card
+      );
+      return { ...state, cardList: updatedCardList };
+    case DELETE_CARD_SUCCESS:
+      return {
+        ...state,
+        cardList: state.cardList.filter(card => card.id !== action.payload),
+      };  
     default:
       return state;
   }

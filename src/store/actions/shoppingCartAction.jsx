@@ -1,6 +1,11 @@
 import { TOGGLE_PRODUCT_CHECKED } from '../reducers/shoppingCartReducer';
 import axiosInstance from '../../mock/axiosInstance';
-
+import {
+  FETCH_CARDS_SUCCESS,
+  ADD_CARD_SUCCESS,
+  UPDATE_CARD_SUCCESS,
+  DELETE_CARD_SUCCESS,
+} from '../reducers/shoppingCartReducer';
 import {
     SET_ADDRESS,
     SET_CART_LIST,
@@ -145,3 +150,54 @@ export const confirmCart = (cartDetails) => ({
   type: 'CONFIRM_CART',
   payload: cartDetails,
 });
+
+export const fetchCards = () => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.get('/user/card', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    dispatch({ type: FETCH_CARDS_SUCCESS, payload: response.data });
+  } catch (error) {
+    console.error("Kartları yüklerken hata oluştu", error);
+  }
+};
+
+export const addCard = (cardData) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.post('/user/card', cardData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    dispatch({ type: ADD_CARD_SUCCESS, payload: response.data });
+    dispatch(fetchCards()); 
+  } catch (error) {
+    console.error("Kart eklerken hata oluştu", error);
+  }
+};
+
+export const updateCard = (cardId, cardData) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.put(`/user/card/${cardId}`, cardData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    dispatch({ type: UPDATE_CARD_SUCCESS, payload: response.data });
+    dispatch(fetchCards());
+  } catch (error) {
+    console.error("Kart güncellerken hata oluştu", error);
+  }
+};
+
+export const deleteCard = (cardId) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.delete(`/user/card/${cardId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    dispatch({ type: DELETE_CARD_SUCCESS, payload: cardId });
+    dispatch(fetchCards());
+  } catch (error) {
+    console.error("Kart silerken hata oluştu", error);
+  }
+};

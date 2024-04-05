@@ -6,6 +6,7 @@ import { confirmCart } from '../store/actions/shoppingCartAction';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // FontAwesomeIcon import ediliyor
 import { faLiraSign } from '@fortawesome/free-solid-svg-icons';
 
+
 const getRandomSize = () => {
     const sizes = Array.from({ length: 9 }, (_, i) => 24 + i * 2); // 24'ten 40'a kadar 2'şerli
     return sizes[Math.floor(Math.random() * sizes.length)];
