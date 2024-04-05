@@ -136,8 +136,8 @@ export default function Header() {
                             <FontAwesomeIcon icon={faCartShopping} />
                             <span> ({totalCartItems})</span>
                             {isCartDropdownOpen && (
-                                <div className="absolute right-0 mt-2 py-4 w-96 bg-white rounded-lg shadow-lg z-20 divide-y divide-gray-200">
-                                    <div className="font-bold text-xl mb-4 p-4">Sepetim ({cartItems.length} Ürün)</div>
+                                <div className="absolute right-0 mt-2 py-4 w-96 bg-zinc-100 rounded-lg shadow-lg z-20 divide-y divide-gray-200">
+                                    <div className="font-bold text-xl mb-4 p-4 ">Sepetim ({cartItems.length} Ürün)</div>
                                     <div className="flex flex-col divide-y divide-gray-200">
                                         {cartItems.map((item, index) => (
                                             <div key={index} className="flex gap-4 items-center p-4">
@@ -151,7 +151,7 @@ export default function Header() {
                                                         <button onClick={(event) => {
                                                             event.stopPropagation();
                                                             dispatch(decrementProductCount(item.product.id));
-                                                        }} className="text-white bg-red-600 hover:bg-red-800 font-bold py-1 px-2.5 rounded">
+                                                        }} className="text-blue bg-white font-bold py-1 px-2.5 rounded">
                                                             -
                                                         </button>
                                                         <span className="mx-2">{item.count}</span>
@@ -168,7 +168,7 @@ export default function Header() {
                                         
                                     </div>
                                     <div className="p-4 flex justify-between items-center">
-                                        <Link to="/shopping-cart" className="bg-orange-600 hover:bg-orange-800 text-white font-bold py-3.5 px-11 rounded">
+                                        <Link to="/shopping-cart" className="bg-white hover:bg-orange-800 text-black font-bold py-3.5 px-11 rounded">
                                             Sepete Git
                                         </Link>
                                         <button onClick={handleCompleteOrder} className="bg-[#2A7CC7] hover:bg-blue-800 text-white font-bold py-3.5 px-4 rounded">

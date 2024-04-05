@@ -225,7 +225,7 @@ const CreateOrderPage = () => {
                   <textarea name="address" placeholder="Adres" onChange={handleChange} value={newAddress.address} className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" maxLength="255"></textarea>
                 </div>
                   <div className="flex justify-between items-center mx-auto">
-                    <button onClick={() => { setShowAddAddressForm(false); setIsEditing(false); }} className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-3 rounded">
+                    <button onClick={() => { setShowAddAddressForm(false); setIsEditing(false); }} className="bg-gray-200 text-black font-bold py-2 px-3 rounded">
                       İptal
                     </button>
                     <button type="submit" className="bg-[#2A7CC7] hover:bg-blue-700 text-white font-bold py-2 px-3 rounded">
@@ -271,7 +271,7 @@ const CreateOrderPage = () => {
                       <i className="fas fa-user-circle text-lg text-gray-400"></i>
                       <span className="ml-2 text-gray-500 ">{address.name} {address.surname}</span>
                     </div>
-                    <span className="flex items-center text-xs font-semibold text-orange-600 bg-orange-200 rounded-full px-2 py-1">
+                    <span className="flex items-center text-xs font-semibold text-orange-600 bg-gray-200 rounded-full px-2 py-1">
                       <i className="fas fa-phone-alt mr-1"></i>
                       {address.phone}
                     </span>
@@ -305,7 +305,7 @@ const CreateOrderPage = () => {
       <div className="flex flex-wrap lg:flex-nowrap">
         <div className="flex-1 container px-3 bg-white-300">
         <div className="grid grid-cols-2 shadow-md">
-        <button onClick={() => { if(currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }} className={`px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}>
+        <button onClick={() => { if(currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }} className={`px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-[#2A7CC7] text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}>
           Adres Bilgileri
         </button>
           <button
@@ -318,7 +318,7 @@ const CreateOrderPage = () => {
           {activeTab === 'addressInfo' && renderAddressInfo()}
           {activeTab === 'paymentOptions' && renderPaymentOptions()}
         </div>
-        <div className="w-1/4 bg-gray-100 px-8 py-10">
+        <div className="w-1/4 bg-zinc-100 px-8 py-10">
           <div className="h-auto sticky top-20">
             <div className="p-4">
             <h1 className="font-semibold text-2xl border-b pb-8">Sipariş Özeti</h1>
@@ -347,7 +347,7 @@ const CreateOrderPage = () => {
               <button onClick={handleSaveAndContinue} className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline">
                 Kaydet ve Devam Et
               </button>
-                <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2">
+                <button className="bg-white hover:bg-orange-600 text-black font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2">
                   Geri Dön
                 </button>
               </div>

@@ -93,7 +93,7 @@ const ShoppingCartPage = () => {
                                 </div>
                             </div>
                             <div className="flex flex-wrap justify-center items-center w-1/3">
-                                <button onClick={() => dispatch(decrementProductCount(item.product.id))} className="text-white bg-red-600 hover:bg-red-800 font-bold py-1 px-3 rounded">-</button>
+                                <button onClick={() => dispatch(decrementProductCount(item.product.id))} className="text-black bg-gray-200 font-bold py-1 px-3 rounded">-</button>
                                 <span className="mx-3 border p-2 rounded">{item.count}</span>
                                 <button onClick={() => dispatch(incrementProductCount(item.product.id))} className="text-white bg-[#2A7CC7] hover:bg-blue-800 font-bold py-1 px-3 rounded">+</button>
                             </div>
@@ -149,7 +149,7 @@ const ShoppingCartPage = () => {
                                 <button onClick={handleConfirmCart} className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2" type="button">
                                     Sepeti Onayla
                                 </button>
-                                <button onClick={handleContinueShopping} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
+                                <button onClick={handleContinueShopping} className="bg-white text-black font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline" type="button">
                                     Alışverişe Devam Et
                                 </button>
                             </div>
