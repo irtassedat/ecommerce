@@ -1,5 +1,7 @@
 import { TOGGLE_PRODUCT_CHECKED } from '../reducers/shoppingCartReducer';
 import axiosInstance from '../../mock/axiosInstance';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   FETCH_CARDS_SUCCESS,
   ADD_CARD_SUCCESS,
@@ -150,42 +152,55 @@ export const confirmCart = (cartDetails) => ({
   type: 'CONFIRM_CART',
   payload: cartDetails,
 });
-
 export const fetchCards = () => async (dispatch) => {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Token'ı localStorage'dan al
     const response = await axiosInstance.get('/user/card', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: token  // Her istek için token'ı ekleyin
+      },
     });
+    console.log("API'den gelen kartlar:", response.data);  // API yanıtını konsola yazdır
     dispatch({ type: FETCH_CARDS_SUCCESS, payload: response.data });
+    toast.success("Kartlar başarıyla yüklendi.");
   } catch (error) {
     console.error("Kartları yüklerken hata oluştu", error);
+    toast.error("Kartları yüklerken bir hata oluştu.");
   }
 };
 
+
+
+// Kart ekleme örneği
 export const addCard = (cardData) => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
     const response = await axiosInstance.post('/user/card', cardData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: token }
     });
     dispatch({ type: ADD_CARD_SUCCESS, payload: response.data });
-    dispatch(fetchCards()); 
+    dispatch(fetchCards());  // Eklendikten sonra kart listesini yeniden çek
+    toast.success("Kart başarıyla eklendi.");
   } catch (error) {
     console.error("Kart eklerken hata oluştu", error);
+    toast.error("Kart eklenirken bir hata oluştu.");
   }
 };
+
+
 
 export const updateCard = (cardId, cardData) => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
     const response = await axiosInstance.put(`/user/card/${cardId}`, cardData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: token }
     });
     dispatch({ type: UPDATE_CARD_SUCCESS, payload: response.data });
-    dispatch(fetchCards());
+    dispatch(fetchCards());  // Güncellendikten sonra kart listesini yeniden çek
+    toast.success("Kart başarıyla güncellendi.");
   } catch (error) {
     console.error("Kart güncellerken hata oluştu", error);
+    toast.error("Kart güncellenirken bir hata oluştu.");
   }
 };
 
@@ -193,11 +208,29 @@ export const deleteCard = (cardId) => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
     await axiosInstance.delete(`/user/card/${cardId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: token }
     });
     dispatch({ type: DELETE_CARD_SUCCESS, payload: cardId });
-    dispatch(fetchCards());
+    dispatch(fetchCards());  // Silindikten sonra kart listesini yeniden çek
+    toast.success("Kart başarıyla silindi.");
   } catch (error) {
     console.error("Kart silerken hata oluştu", error);
+    toast.error("Kart silinirken bir hata oluştu.");
   }
 };
+export const createOrder = (orderData) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.post('/order', orderData, {
+      headers: { Authorization: token }
+    });
+    dispatch({ type: 'CREATE_ORDER_SUCCESS', payload: response.data });
+    alert("Sipariş başarıyla oluşturuldu. Tebrikler!");
+    // Burada sipariş sonrası işlemleri tetikleyebilirsiniz (örn. sepeti temizleme)
+  } catch (error) {
+    console.error("Sipariş oluşturulurken hata oluştu", error);
+    alert("Sipariş oluşturulurken bir hata oluştu.");
+  }
+};
+
+

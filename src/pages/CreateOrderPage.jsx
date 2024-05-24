@@ -13,7 +13,7 @@ import {
   getNeighbourhoodsByCityCodeAndDistrict,
   castCityCode
 } from 'turkey-neighbourhoods';
-
+import PaymentOptions from './PaymentOptions';
 
 
 const CreateOrderPage = () => {
@@ -295,7 +295,7 @@ const CreateOrderPage = () => {
   const renderPaymentOptions = () => {
     return (
       <div>
-        {/* Ödeme seçenekleri içeriği burada olacak */}
+        <PaymentOptions />;
       </div>
     );
   };
