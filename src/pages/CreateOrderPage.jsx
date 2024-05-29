@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchAddresses, setAddressAction, deleteAddress, addAddressAndUpdateList, updateAddress } from '../store/actions/shoppingCartAction';
+import { fetchAddresses, setAddressAction, deleteAddress, addAddressAndUpdateList, updateAddress, createOrder } from '../store/actions/shoppingCartAction';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
@@ -12,7 +12,6 @@ const CreateOrderPage = () => {
     const [showAddAddressForm, setShowAddAddressForm] = useState(false);
     const [editingAddressId, setEditingAddressId] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [selectedAddressId, setSelectedAddressId] = useState(null);
     const [newAddress, setNewAddress] = useState({
         title: '',
         name: '',
@@ -23,18 +22,24 @@ const CreateOrderPage = () => {
         neighborhood: '',
         address: '',
     });
-    const { addressList, totalPrice, shippingCost } = useSelector((state) => state.shoppingCart);
-    const cartDetails = useSelector((state) => state.shoppingCart.cartDetails);
+    const { addressList, totalPrice, shippingCost, currentAddress, payment, cartDetails } = useSelector((state) => state.shoppingCart);
     const [isEligibleForFreeShipping, setEligibleForFreeShipping] = useState(false);
-    const currentAddress = useSelector(state => state.shoppingCart.currentAddress);
     const [activeTab, setActiveTab] = useState('addressInfo');
     const isValidPhone = (phone) => phone.length === 10;
     const isValidAddress = (address) => address.length >= 3;
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
+
 
     useEffect(() => {
         dispatch(fetchAddresses());
         setEligibleForFreeShipping(totalPrice > 150);
     }, [dispatch, totalPrice]);
+
+    console.log("Current Address:", currentAddress);
+    console.log("Selected Card:", payment);
+    console.log("Selected Address ID:", selectedAddressId);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -143,6 +148,60 @@ const CreateOrderPage = () => {
             toast.info("Ödeme seçeneklerine geçiş yapabilmek için önce bir adres seçmelisiniz.");
         }
     };
+
+    const handleOrderSubmit = () => {
+        if (!selectedAddressId || !payment) {
+            toast.error("Lütfen adres ve kart bilgilerini seçin.");
+            return;
+        }
+    
+        if (!cartDetails || !cartDetails.products) {
+            toast.error("Ürün detayları yüklenemedi.");
+            return;
+        }
+    
+        console.log("Order Data:", {
+            address_id: selectedAddressId,
+            order_date: new Date().toISOString(),
+            card_no: payment.card_no.replace(/\d(?=\d{4})/g, "*"),
+            card_name: payment.name_on_card,
+            card_expire_month: payment.expire_month,
+            card_expire_year: payment.expire_year,
+            card_ccv: payment.ccv,
+            price: cartDetails.totalPrice,
+            products: cartDetails.products
+        });
+    
+        setIsSubmitting(true);
+    
+        const orderData = {
+            address_id: selectedAddressId,
+            order_date: new Date().toISOString(),
+            card_no: payment.card_no.replace(/\d(?=\d{4})/g, "*"),
+            card_name: payment.name_on_card,
+            card_expire_month: payment.expire_month,
+            card_expire_year: payment.expire_year,
+            card_ccv: payment.ccv,
+            price: cartDetails.totalPrice,
+            products: cartDetails.products.map(product => ({
+                product_id: product.id,
+                count: product.count,
+                detail: product.detail
+            }))
+        };
+    
+        dispatch(createOrder(orderData))
+            .then(() => {
+                toast.success("Order created successfully!");
+                setIsSubmitting(false);
+            })
+            .catch((error) => {
+                console.error("Order creation error:", error);
+                toast.error("Failed to create order. Please try again.");
+                setIsSubmitting(false);
+            });
+    };
+    
 
     const renderAddressInfo = () => {
     return (
@@ -265,102 +324,133 @@ const CreateOrderPage = () => {
                     </div>
                 </div>
                 <div onClick={() => { setShowAddAddressForm(true); setIsEditing(false); }} className="p-4 mb-4 bg-white rounded shadow cursor-pointer flex justify-center items-center flex-col">
-                            <div className="text-3xl">+</div>
-                            <div className="text-md mt-2">Add New Address</div>
-                        </div>
+                    <div className="text-3xl">+</div>
+                    <div className="text-md mt-2">Add New Address</div>
+                </div>
             </div>
         </div>
     );
 };
     
-
-    const renderPaymentOptions = () => {
-        return (
-            <div>
-                <PaymentOptions />
-            </div>
-        );
-    };
-
+const renderPaymentOptions = () => {
     return (
-        <div className="container xl mx-auto mt-10 p-6">
-            <div className="flex flex-wrap lg:flex-nowrap">
-                <div className="flex-1 container px-3 bg-white-300">
-                    <div className="grid grid-cols-2 shadow-md relative">
-                        <div className="flex items-center relative">
-                            <button
-                                onClick={() => { if (currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }}
-                                className={`flex-1 px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-[#2A7CC7] text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}
-                            >
-                                <div>Adres Bilgileri</div>
-                                {currentAddress?.id && (
-                                    <div className="ml-4 inline-block">
-                                        <div className="text-sm font-semibold">{currentAddress.title}</div>
-                                        <div className="text-sm">{currentAddress.name} {currentAddress.surname}</div>
-                                        <div className="text-sm">{currentAddress.address}</div>
-                                        <div className="text-sm">{currentAddress.city} / {currentAddress.district} / {currentAddress.neighborhood}</div>
-                                    </div>
-                                )}
-                            </button>
+        <div>
+            <PaymentOptions />
+        </div>
+    );
+};
+
+return (
+    <div className="container xl mx-auto mt-10 p-6 overflow-x-hidden">
+        <div className="flex flex-wrap lg:flex-nowrap">
+            <div className="flex-1 container px-3 bg-white-300">
+                <div className="grid grid-cols-2 shadow-md relative -mx-2">
+                    <div className="flex items-center relative">
+                    <button
+                        onClick={() => { if (currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }}
+                        className={`flex-1 px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-[#2A7CC7] text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}
+                        aria-label="Adres Bilgileri"
+                    >
+                            <div>Adres Bilgileri</div>
                             {currentAddress?.id && (
-                                <button
-                                    onClick={() => handleEditAddressClick(currentAddress)}
-                                    className={`absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center ${activeTab === 'addressInfo' ? 'text-gray-500 hover:text-[#2A7CC7]' : 'text-gray-500'}`}
-                                >
-                                    <FontAwesomeIcon icon={faEdit} className="mr-1 text-red-300" />
-                                </button>
+                                <div className="ml-4 inline-block">
+                                    <div className="text-sm font-semibold">{currentAddress.title}</div>
+                                    <div className="text-sm">{currentAddress.name} {currentAddress.surname}</div>
+                                    <div className="text-sm">{currentAddress.address}</div>
+                                    <div className="text-sm">{currentAddress.city} / {currentAddress.district} / {currentAddress.neighborhood}</div>
+                                </div>
                             )}
-                        </div>
-                        <button
-                            onClick={handleTabChangeToPayment}
-                            onMouseEnter={handleMouseEnterPaymentTab}
-                            className={paymentTabClassName}
-                        >
-                            Ödeme Seçenekleri
                         </button>
+                        {currentAddress?.id && (
+                            <button
+                                onClick={() => handleEditAddressClick(currentAddress)}
+                                className={`absolute right-0 top-1/2 transform -translate-y-1/2 flex items-center ${activeTab === 'addressInfo' ? 'text-gray-500 hover:text-[#2A7CC7]' : 'text-gray-500'}`}
+                            >
+                                <FontAwesomeIcon icon={faEdit} className="mr-1" />
+                                <span>Düzenle</span>
+                            </button>
+                        )}
                     </div>
-                    {activeTab === 'addressInfo' && renderAddressInfo()}
-                    {activeTab === 'paymentOptions' && renderPaymentOptions()}
+                    <button
+                        onClick={handleTabChangeToPayment}
+                        onMouseEnter={handleMouseEnterPaymentTab}
+                        className={paymentTabClassName}
+                    >
+                        Ödeme Seçenekleri
+                    </button>
                 </div>
-                <div className="w-1/4 bg-zinc-100 px-8 py-10">
-                    <div className="h-auto sticky top-20">
-                        <div className="p-4">
-                            <h1 className="font-semibold text-2xl border-b pb-8">Sipariş Özeti</h1>
-                            <div className="border-t-2 border-gray-300"></div>
-                            <div className="mt-10">
-                                <div className="flex justify-between py-2 text-gray-600">
-                                    <span>Ürün Toplamı</span>
-                                    <span>{cartDetails.totalPrice.toFixed(2)} TL</span>
-                                </div>
-                                <div className="flex justify-between py-2 text-gray-600">
-                                    <span>Kargo Toplam</span>
-                                    <span>{cartDetails.isEligibleForFreeShipping ? 'Ücretsiz' : `${cartDetails.shippingCost.toFixed(2)} TL`}</span>
-                                </div>
-                                {cartDetails.isEligibleForFreeShipping && (
-                                    <div className="flex justify-between py-2 text-green-600">
-                                        <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
-                                        <span>-{cartDetails.shippingCost.toFixed(2)} TL</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between py-2 text-gray-900 font-bold">
-                                    <span>Toplam</span>
-                                    <span>{(cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)).toFixed(2)} TL</span>
-                                </div>
+                {activeTab === 'addressInfo' && renderAddressInfo()}
+                {activeTab === 'paymentOptions' && renderPaymentOptions()}
+            </div>
+            <div className="w-1/4 bg-zinc-100 px-8 py-10">
+                <div className="h-auto sticky top-20">
+                    <div className="p-4">
+                        <h1 className="font-semibold text-2xl border-b pb-8">Sipariş Özeti</h1>
+                        <div className="border-t-2 border-gray-300"></div>
+                        <div className="mt-10">
+                            <div className="flex justify-between py-2 text-gray-600">
+                                <span>Ürün Toplamı</span>
+                                <span>{cartDetails.totalPrice.toFixed(2)} TL</span>
                             </div>
-                            <div className="mt-10">
-                                <button onClick={handleSaveAndContinue} className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline">
-                                    Kaydet ve Devam Et
-                                </button>
-                                <button className="bg-white hover:bg-orange-600 text-black font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2">
-                                    Geri Dön
-                                </button>
+                            <div className="flex justify-between py-2 text-gray-600">
+                                <span>Kargo Toplam</span>
+                                <span>{cartDetails.isEligibleForFreeShipping ? 'Ücretsiz' : `${cartDetails.shippingCost.toFixed(2)} TL`}</span>
                             </div>
+                            {cartDetails.isEligibleForFreeShipping && (
+                                <div className="flex justify-between py-2 text-green-600">
+                                    <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
+                                    <span>-{cartDetails.shippingCost.toFixed(2)} TL</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between py-2 text-gray-900 font-bold">
+                                <span>Toplam</span>
+                                <span>{(cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)).toFixed(2)} TL</span>
+                            </div>
+                        </div>
+                        <div className="mt-10">
+                            {activeTab === 'paymentOptions' ? (
+                                <div>
+                                    {selectedAddressId && payment ? (
+                                        <button
+                                            onClick={handleOrderSubmit}
+                                            className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline"
+                                            disabled={isSubmitting}
+                                            aria-label="Ödeme Yap"
+                                        >
+                                            Ödeme Yap
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="bg-gray-500 text-white font-bold py-3 text-sm uppercase w-full rounded cursor-not-allowed"
+                                            disabled
+                                        >
+                                            Ödeme Yap
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div>
+                                    <button
+                                        onClick={handleSaveAndContinue}
+                                        className="bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline"
+                                    >
+                                        Kaydet ve Devam Et
+                                    </button>
+                                    <button
+                                        className="bg-white hover:bg-orange-600 text-black font-bold py-3 text-sm uppercase w-full rounded focus:outline-none focus:shadow-outline my-2"
+                                    >
+                                        Geri Dön
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    );                        
+    </div>
+);
 };
 
 export default CreateOrderPage;
+
