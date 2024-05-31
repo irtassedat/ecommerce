@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchAddresses, setAddressAction, deleteAddress, addAddressAndUpdateList, updateAddress, createOrder } from '../store/actions/shoppingCartAction';
+import { fetchAddresses, setAddressAction, deleteAddress, addAddressAndUpdateList, updateAddress, createOrder, resetCart} from '../store/actions/shoppingCartAction';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
@@ -30,16 +30,14 @@ const CreateOrderPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedAddressId, setSelectedAddressId] = useState(null);
 
-
     useEffect(() => {
         dispatch(fetchAddresses());
-        setEligibleForFreeShipping(totalPrice > 150);
     }, [dispatch, totalPrice]);
 
     console.log("Current Address:", currentAddress);
     console.log("Selected Card:", payment);
     console.log("Selected Address ID:", selectedAddressId);
-
+    console.log("Cart Details:", cartDetails); // Add this line to log cartDetails
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -150,29 +148,16 @@ const CreateOrderPage = () => {
     };
 
     const handleOrderSubmit = () => {
+        console.log('handleOrderSubmit başladı');
         if (!selectedAddressId || !payment) {
-            toast.error("Lütfen adres ve kart bilgilerini seçin.");
+            toast.error("Please select an address and a payment method before proceeding.");
             return;
         }
     
-        if (!cartDetails || !cartDetails.products) {
+        if (!cartDetails || !cartDetails.products || cartDetails.products.length === 0) {
             toast.error("Ürün detayları yüklenemedi.");
             return;
         }
-    
-        console.log("Order Data:", {
-            address_id: selectedAddressId,
-            order_date: new Date().toISOString(),
-            card_no: payment.card_no.replace(/\d(?=\d{4})/g, "*"),
-            card_name: payment.name_on_card,
-            card_expire_month: payment.expire_month,
-            card_expire_year: payment.expire_year,
-            card_ccv: payment.ccv,
-            price: cartDetails.totalPrice,
-            products: cartDetails.products
-        });
-    
-        setIsSubmitting(true);
     
         const orderData = {
             address_id: selectedAddressId,
@@ -181,26 +166,34 @@ const CreateOrderPage = () => {
             card_name: payment.name_on_card,
             card_expire_month: payment.expire_month,
             card_expire_year: payment.expire_year,
-            card_ccv: payment.ccv,
+            card_ccv: payment.ccv || payment.cvv, // card ccv eklenmesi
             price: cartDetails.totalPrice,
             products: cartDetails.products.map(product => ({
-                product_id: product.id,
+                product_id: product.product_id,
                 count: product.count,
-                detail: product.detail
+                detail: product.detail || "default detail" // product detail eklenmesi
             }))
         };
     
+        console.log("Order Data:", orderData);
+    
+        setIsSubmitting(true);
+    
         dispatch(createOrder(orderData))
             .then(() => {
+                console.log('createOrder resolved');
                 toast.success("Order created successfully!");
+                dispatch(resetCart());
                 setIsSubmitting(false);
             })
             .catch((error) => {
+                console.log('createOrder rejected', error);
                 console.error("Order creation error:", error);
                 toast.error("Failed to create order. Please try again.");
                 setIsSubmitting(false);
             });
-    };
+        console.log('After dispatching createOrder');
+    };    
     
 
     const renderAddressInfo = () => {
@@ -340,17 +333,55 @@ const renderPaymentOptions = () => {
     );
 };
 
+const renderOrderSummary = () => {
+    if (!cartDetails) {
+        return <div>Ürün detayları yüklenemedi.</div>;
+    }
+
+    const { totalPrice = 0, shippingCost = 0, grandTotal = 0, isEligibleForFreeShipping } = cartDetails;
+
+    return (
+        <div className="p-4">
+            <h1 className="font-semibold text-2xl border-b pb-8">Sipariş Özeti</h1>
+            <div className="border-t-2 border-gray-300"></div>
+            <div className="mt-10">
+                <div className="flex justify-between py-2 text-gray-600">
+                    <span>Ürün Toplamı</span>
+                    <span>{totalPrice.toFixed(2)} TL</span>
+                </div>
+                <div className="flex justify-between py-2 text-gray-600">
+                    <span>Kargo Toplam</span>
+                    <span>{shippingCost.toFixed(2)} TL</span>
+                </div>
+                {isEligibleForFreeShipping && (
+                    <div className="flex justify-between py-2 text-green-600">
+                        <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
+                        <span>-{shippingCost.toFixed(2)} TL</span>
+                    </div>
+                )}
+                <div className="flex justify-between py-2 text-gray-900 font-bold">
+                    <span>Toplam</span>
+                    <span>{grandTotal.toFixed(2)} TL</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+
+
 return (
     <div className="container xl mx-auto mt-10 p-6 overflow-x-hidden">
         <div className="flex flex-wrap lg:flex-nowrap">
             <div className="flex-1 container px-3 bg-white-300">
                 <div className="grid grid-cols-2 shadow-md relative -mx-2">
                     <div className="flex items-center relative">
-                    <button
-                        onClick={() => { if (currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }}
-                        className={`flex-1 px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-[#2A7CC7] text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}
-                        aria-label="Adres Bilgileri"
-                    >
+                        <button
+                            onClick={() => { if (currentAddress) setActiveTab('addressInfo'); else toast.error("Lütfen bir adres seçin."); }}
+                            className={`flex-1 px-10 py-4 ${activeTab === 'addressInfo' ? 'bg-[#2A7CC7] text-white' : 'bg-gray-200 text-gray-800'} rounded-tl-lg`}
+                            aria-label="Adres Bilgileri"
+                        >
                             <div>Adres Bilgileri</div>
                             {currentAddress?.id && (
                                 <div className="ml-4 inline-block">
@@ -390,21 +421,21 @@ return (
                         <div className="mt-10">
                             <div className="flex justify-between py-2 text-gray-600">
                                 <span>Ürün Toplamı</span>
-                                <span>{cartDetails.totalPrice.toFixed(2)} TL</span>
+                                <span>{(cartDetails.totalPrice ?? 0).toFixed(2)} TL</span>
                             </div>
                             <div className="flex justify-between py-2 text-gray-600">
                                 <span>Kargo Toplam</span>
-                                <span>{cartDetails.isEligibleForFreeShipping ? 'Ücretsiz' : `${cartDetails.shippingCost.toFixed(2)} TL`}</span>
+                                <span>{(cartDetails.shippingCost ?? 0).toFixed(2)} TL</span>
                             </div>
                             {cartDetails.isEligibleForFreeShipping && (
                                 <div className="flex justify-between py-2 text-green-600">
                                     <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
-                                    <span>-{cartDetails.shippingCost.toFixed(2)} TL</span>
+                                    <span>-{(cartDetails.shippingCost ?? 0).toFixed(2)} TL</span>
                                 </div>
                             )}
                             <div className="flex justify-between py-2 text-gray-900 font-bold">
                                 <span>Toplam</span>
-                                <span>{(cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)).toFixed(2)} TL</span>
+                                <span>{((cartDetails.totalPrice ?? 0) + (!(cartDetails.isEligibleForFreeShipping ?? false) ? (cartDetails.shippingCost ?? 0) : 0)).toFixed(2)} TL</span>
                             </div>
                         </div>
                         <div className="mt-10">
@@ -450,6 +481,8 @@ return (
         </div>
     </div>
 );
+
+
 };
 
 export default CreateOrderPage;

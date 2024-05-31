@@ -51,22 +51,31 @@ const ShoppingCartPage = () => {
     };
 
     const handleConfirmCart = () => {
+        if (!cartItems || cartItems.length === 0) {
+            toast.error("Sepetinizde ürün yok.");
+            return;
+        }
+        
         const cartDetails = {
             totalPrice, // Ürün toplamı
             isEligibleForFreeShipping, // Ücretsiz kargo uygunluğu
             shippingCost, // Kargo toplamı
             grandTotal: totalPrice + (!isEligibleForFreeShipping ? shippingCost : 0), // Toplam tutar
             discountCode, // İndirim kodu (eğer uygulandıysa)
+            products: cartItems.map(item => ({
+                product_id: item.product.id,
+                count: item.count,
+                detail: item.product.detail
+            })) // Ürün detayları
         };
+    
         dispatch(confirmCart(cartDetails));
         history.push('/create-order');
-        const cartDetailsSafe = cartDetails || {
-            totalPrice: 0,
-            shippingCost: 0,
-            isEligibleForFreeShipping: false
-        };
     };
-
+    
+    
+    
+    
     return (
         <div className="container x mx-auto mt-10">
             <div className="flex shadow-md my-10 bg-white rounded-lg">
