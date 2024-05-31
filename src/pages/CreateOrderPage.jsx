@@ -6,6 +6,8 @@ import { faEdit, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { getCities, getDistrictsByCityCode, getNeighbourhoodsByCityCodeAndDistrict } from 'turkey-neighbourhoods';
 import PaymentOptions from './PaymentOptions';
+import { fetchProductById } from '../store/actions/productActions';
+
 
 const CreateOrderPage = () => {
     const dispatch = useDispatch();
@@ -147,7 +149,7 @@ const CreateOrderPage = () => {
         }
     };
 
-    const handleOrderSubmit = () => {
+    const handleOrderSubmit = async () => {
         console.log('handleOrderSubmit başladı');
         if (!selectedAddressId || !payment) {
             toast.error("Please select an address and a payment method before proceeding.");
@@ -159,39 +161,45 @@ const CreateOrderPage = () => {
             return;
         }
     
-        const orderData = {
-            address_id: selectedAddressId,
-            order_date: new Date().toISOString(),
-            card_no: payment.card_no.replace(/\d(?=\d{4})/g, "*"),
-            card_name: payment.name_on_card,
-            card_expire_month: payment.expire_month,
-            card_expire_year: payment.expire_year,
-            card_ccv: payment.ccv || payment.cvv, // card ccv eklenmesi
-            price: cartDetails.totalPrice,
-            products: cartDetails.products.map(product => ({
-                product_id: product.product_id,
-                count: product.count,
-                detail: product.detail || "default detail" // product detail eklenmesi
-            }))
-        };
-    
-        console.log("Order Data:", orderData);
-    
         setIsSubmitting(true);
     
-        dispatch(createOrder(orderData))
-            .then(() => {
-                console.log('createOrder resolved');
-                toast.success("Order created successfully!");
-                dispatch(resetCart());
-                setIsSubmitting(false);
-            })
-            .catch((error) => {
-                console.log('createOrder rejected', error);
-                console.error("Order creation error:", error);
-                toast.error("Failed to create order. Please try again.");
-                setIsSubmitting(false);
-            });
+        try {
+            // Ürün detaylarını çekmek için her bir product_id ile fetchProductById çağrısı yapın
+            const productDetails = await Promise.all(
+                cartDetails.products.map(async (product) => {
+                    const productData = await dispatch(fetchProductById(product.product_id)).unwrap();
+                    return {
+                        ...product,
+                        detail: productData.description // Ürün detayını response'tan alıyoruz
+                    };
+                })
+            );
+    
+            const orderData = {
+                address_id: selectedAddressId,
+                order_date: new Date().toISOString(),
+                card_no: payment.card_no.replace(/\d(?=\d{4})/g, "*"),
+                card_name: payment.name_on_card,
+                card_expire_month: payment.expire_month,
+                card_expire_year: payment.expire_year,
+                card_ccv: payment.ccv || payment.cvv, // card ccv eklenmesi
+                price: cartDetails.totalPrice,
+                products: productDetails // Ürün detaylarını içeren ürünler
+            };
+    
+            console.log("Order Data:", orderData);
+    
+            await dispatch(createOrder(orderData));
+            console.log('createOrder resolved');
+            toast.success("Order created successfully!");
+            dispatch(resetCart());
+            setIsSubmitting(false);
+        } catch (error) {
+            console.log('createOrder rejected', error);
+            console.error("Order creation error:", error);
+            toast.error("Failed to create order. Please try again.");
+            setIsSubmitting(false);
+        }
         console.log('After dispatching createOrder');
     };    
     

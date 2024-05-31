@@ -1,5 +1,5 @@
 import axios from '../../mock/axiosInstance';
-
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   SET_PRODUCT,
   SET_PRODUCTCOUNT,
@@ -59,3 +59,8 @@ export const ductsWithId = (id) => async (dispatch) => {
     console.error('Ürün detayları çekerken bir hata oluştu:', error);
   }
 };
+
+export const fetchProductById = createAsyncThunk('products/fetchById', async (productId) => {
+  const response = await axios.get(`/products/${productId}`);
+  return response.data;
+});
