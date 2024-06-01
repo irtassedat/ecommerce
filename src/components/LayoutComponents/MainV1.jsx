@@ -7,7 +7,7 @@ import ContentWrapper from "./ContentWrapper";
 import Footer from "./Footer";
 import Header from "./Header";
 
-export default function Main() {
+export default function MainV1() {
     const dispatch = useDispatch();
 
     useEffect(() => {

@@ -1,11 +1,11 @@
 import React from 'react';
-import Main from './components/layoutcomponents/Main'; // Doğru yolu kullanın
+import MainV1 from './components/layoutcomponents/MainV1';
 import './App.css';
 
 function App() {
   return (
     <>
-      <Main />
+      <MainV1 />
     </>
   );
 }
