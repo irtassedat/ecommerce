@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import { getCities, getDistrictsByCityCode, getNeighbourhoodsByCityCodeAndDistrict } from 'turkey-neighbourhoods';
 import PaymentOptions from './PaymentOptions';
 import { fetchProductById } from '../store/actions/productActions';
+import { useHistory } from "react-router-dom";
+
 
 
 const CreateOrderPage = () => {
@@ -31,6 +33,7 @@ const CreateOrderPage = () => {
     const isValidAddress = (address) => address.length >= 3;
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedAddressId, setSelectedAddressId] = useState(null);
+    const history = useHistory();
 
     useEffect(() => {
         dispatch(fetchAddresses());
@@ -155,14 +158,14 @@ const CreateOrderPage = () => {
             toast.error("Please select an address and a payment method before proceeding.");
             return;
         }
-    
+
         if (!cartDetails || !cartDetails.products || cartDetails.products.length === 0) {
             toast.error("Ürün detayları yüklenemedi.");
             return;
         }
-    
+
         setIsSubmitting(true);
-    
+
         try {
             // Ürün detaylarını çekmek için her bir product_id ile fetchProductById çağrısı yapın
             const productDetails = await Promise.all(
@@ -174,7 +177,7 @@ const CreateOrderPage = () => {
                     };
                 })
             );
-    
+
             const orderData = {
                 address_id: selectedAddressId,
                 order_date: new Date().toISOString(),
@@ -182,18 +185,19 @@ const CreateOrderPage = () => {
                 card_name: payment.name_on_card,
                 card_expire_month: payment.expire_month,
                 card_expire_year: payment.expire_year,
-                card_ccv: payment.ccv || payment.cvv, // card ccv eklenmesi
+                card_ccv: payment.ccv || payment.cvv,
                 price: cartDetails.totalPrice,
                 products: productDetails // Ürün detaylarını içeren ürünler
             };
-    
+
             console.log("Order Data:", orderData);
-    
+
             await dispatch(createOrder(orderData));
             console.log('createOrder resolved');
             toast.success("Order created successfully!");
             dispatch(resetCart());
             setIsSubmitting(false);
+            history.push("/previous-orders");
         } catch (error) {
             console.log('createOrder rejected', error);
             console.error("Order creation error:", error);
@@ -458,6 +462,7 @@ return (
                                         >
                                             Ödeme Yap
                                         </button>
+                                        
                                     ) : (
                                         <button
                                             className="bg-gray-500 text-white font-bold py-3 text-sm uppercase w-full rounded cursor-not-allowed"
