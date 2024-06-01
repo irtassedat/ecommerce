@@ -16,12 +16,10 @@ export default function Main() {
             axiosInstance.get('/verify')
             .then(response => {
                 dispatch(setUser(response.data));
-                // Token'ı yenile, bu örnekte backend tarafından yenilenmiş token dönülüyor varsayılmıştır
                 localStorage.setItem('token', response.data.token);
                 axiosInstance.defaults.headers.common['Authorization'] = response.data.token;
             })
             .catch(error => {
-                // Token doğrulanamadı, kullanıcı bilgilerini temizle
                 dispatch(clearUser());
                 localStorage.removeItem('token');
                 delete axiosInstance.defaults.headers.common['Authorization'];
