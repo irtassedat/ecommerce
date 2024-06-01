@@ -441,7 +441,7 @@ return (
                             </div>
                             {cartDetails.isEligibleForFreeShipping && (
                                 <div className="flex justify-between py-2 text-green-600">
-                                    <span>150 TL ve Üzeri <br />Kargo Bedava (Satıcı Karşılar)</span>
+                                    <span>(Satıcı Karşılar)</span>
                                     <span>-{(cartDetails.shippingCost ?? 0).toFixed(2)} TL</span>
                                 </div>
                             )}
