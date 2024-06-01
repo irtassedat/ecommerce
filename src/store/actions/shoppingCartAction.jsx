@@ -186,16 +186,14 @@ export const addCard = (cardData) => async (dispatch) => {
 
 export const updateCard = (cardId, cardData) => async (dispatch) => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await axiosInstance.put(`/user/card/${cardId}`, cardData, {
-      headers: { Authorization: token }
+    const response = await axiosInstance.put('/user/card', { ...cardData, id: cardId }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     dispatch({ type: UPDATE_CARD_SUCCESS, payload: response.data });
     dispatch(fetchCards());  // Güncellendikten sonra kart listesini yeniden çek
-    toast.success("Kart başarıyla güncellendi.");
+    toast.success('Kart başarıyla güncellendi.');
   } catch (error) {
-    console.error("Kart güncellerken hata oluştu", error);
-    toast.error("Kart güncellenirken bir hata oluştu.");
+    toast.error('Kart güncellenirken bir hata oluştu.');
   }
 };
 
