@@ -12,7 +12,8 @@ const PaymentOptions = () => {
     card_no: '',
     expire_month: '',
     expire_year: '',
-    name_on_card: ''
+    name_on_card: '',
+    cvv: ''
   });
   const [editMode, setEditMode] = useState(false);
   const [editCardId, setEditCardId] = useState(null);
@@ -23,10 +24,11 @@ const PaymentOptions = () => {
     dispatch(fetchCards());
   }, [dispatch]);
 
-  const handleAddCard = (e) => {
+  const handleAddCard = async (e) => {
     e.preventDefault();
-    dispatch(addCard(newCard));
-    setNewCard({ card_no: '', expire_month: '', expire_year: '', name_on_card: '' });
+    const { cvv, ...cardData } = newCard; // Exclude CVV from the data to be submitted
+    await dispatch(addCard(cardData));
+    setNewCard({ card_no: '', expire_month: '', expire_year: '', name_on_card: '', cvv: '' });
     setShowAddCardForm(false);
   };
 
@@ -39,15 +41,17 @@ const PaymentOptions = () => {
     setNewCard({ ...newCard, [name]: value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    const { cvv, ...cardData } = newCard; // Exclude CVV from the data to be submitted
     if (editMode) {
-      dispatch(updateCard(editCardId, newCard));
+      await dispatch(updateCard(editCardId, cardData));
     } else {
-      dispatch(addCard(newCard));
+      await dispatch(addCard(cardData));
     }
-    setNewCard({ card_no: '', expire_month: '', expire_year: '', name_on_card: '' });
+    setNewCard({ card_no: '', expire_month: '', expire_year: '', name_on_card: '', cvv: '' });
     setEditMode(false);
+    setShowAddCardForm(false);
   };
 
   const handleEdit = (card) => {
@@ -63,7 +67,7 @@ const PaymentOptions = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow">
+    <div className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow relative z-10">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
           <h3 className="text-md font-semibold mb-4">Kart Bilgileri</h3>
@@ -93,35 +97,97 @@ const PaymentOptions = () => {
           ))}
         </div>
         {showAddCardForm && (
-          <form onSubmit={handleAddCard} className="mt-4 bg-gray-200 p-4 rounded-lg shadow-md">
-            <input type="text" placeholder="Kart Numarası" name="card_no" value={newCard.card_no} onChange={handleInputChange} required className="p-2 rounded border-2 border-gray-300 w-full mb-2" />
-            <input type="text" placeholder="Son Kullanma Ayı" name="expire_month" value={newCard.expire_month} onChange={handleInputChange} required className="p-2 rounded border-2 border-gray-300 w-full mb-2" />
-            <input type="text" placeholder="Son Kullanma Yılı" name="expire_year" value={newCard.expire_year} onChange={handleInputChange} required className="p-2 rounded border-2 border-gray-300 w-full mb-2" />
-            <input type="text" placeholder="Kart Üzerindeki İsim" name="name_on_card" value={newCard.name_on_card} onChange={handleInputChange} required className="p-2 rounded border-2 border-gray-300 w-full mb-2" />
-            <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">{editMode ? 'Kartı Güncelle' : 'Kart Ekle'}</button>
-          </form>
-        )}
-        <div>
-          <h3 className="text-md font-semibold mb-4">Taksit Seçenekleri</h3>
-          <p className="text-sm mb-4">Kartınıza uygun taksit seçeneğini seçiniz</p>
-          <div className="p-4 border rounded-lg">
-            <div className="flex justify-between items-center mb-2">
-              <input type="radio" name="installmentOption" className="mr-2" />
-              <span className="text-sm">Tek Çekim</span>
-              <span className="text-sm">{(cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)).toFixed(2)} TL</span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <input type="radio" name="installmentOption" className="mr-2" />
-              <span className="text-sm">2 Taksit</span>
-              <span className="text-sm">{((cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)) / 2).toFixed(2)} TL</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <input type="radio" name="installmentOption" className="mr-2" />
-              <span className="text-sm">3 Taksit</span>
-              <span className="text-sm">{((cartDetails.totalPrice + (!cartDetails.isEligibleForFreeShipping ? cartDetails.shippingCost : 0)) / 3).toFixed(2)} TL</span>
+          <div className="fixed inset-0 flex items-center justify-center z-20">
+            <div className="fixed inset-0 bg-black opacity-50"></div>
+            <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 w-full max-w-md relative">
+              <button className="absolute top-2 right-2 text-zinc-400 dark:text-zinc-300" onClick={() => setShowAddCardForm(false)}>
+                &times;
+              </button>
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{editMode ? 'Edit Card' : 'Add Card'}</h1>
+              </div>
+              <p className="text-zinc-500 dark:text-zinc-400 mb-6">{editMode ? 'Edit your debit/credit card' : 'Add your debit/credit card'}</p>
+              <div className="bg-gradient-to-r from-orange-400 to-red-400 p-4 rounded-lg mb-6">
+                <div className="text-white">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-lg font-bold">MyPay</span>
+                    <img src="https://placehold.co/30x30" alt="Card Logo" />
+                  </div>
+                  <div className="text-xl font-semibold tracking-widest mb-4">
+                    {newCard.card_no ? `**** **** **** ${newCard.card_no.slice(-4)}` : 'XXXX XXXX XXXX XXXX'}
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>{newCard.name_on_card || 'Cardholder Name'}</span>
+                    <span>Valid Thru {newCard.expire_month ? newCard.expire_month.toString().padStart(2, '0') : 'MM'}/{newCard.expire_year ? newCard.expire_year.toString().slice(-2) : 'YY'}</span>
+                  </div>
+                </div>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Card number</label>
+                  <input
+                    type="text"
+                    name="card_no"
+                    value={newCard.card_no}
+                    onChange={handleInputChange}
+                    placeholder="Card number"
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Cardholder name</label>
+                  <input
+                    type="text"
+                    name="name_on_card"
+                    value={newCard.name_on_card}
+                    onChange={handleInputChange}
+                    placeholder="Cardholder name"
+                    className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <div className="flex-1">
+                    <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Expiration Date</label>
+                    <input
+                      type="text"
+                      name="expire_month"
+                      value={newCard.expire_month}
+                      onChange={handleInputChange}
+                      placeholder="MM"
+                      className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Expiration Year</label>
+                    <input
+                      type="text"
+                      name="expire_year"
+                      value={newCard.expire_year}
+                      onChange={handleInputChange}
+                      placeholder="YYYY"
+                      className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-zinc-700 dark:text-zinc-300 mb-1"> (CVV/CVC)</label>
+                    <input
+                      type="text"
+                      name="cvv"
+                      value={newCard.cvv}
+                      onChange={handleInputChange}
+                      placeholder="CVV"
+                      className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="mt-6 w-full bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase rounded-lg">
+                  {editMode ? 'Update' : 'Next'}
+                </button>
+              </form>
             </div>
           </div>
-        </div>
+        )}
       </div>
       <div onClick={() => setShowAddCardForm(true)} className="mt-4 p-4 bg-white rounded shadow cursor-pointer flex justify-center items-center flex-col">
         <div className="text-3xl">+</div>
