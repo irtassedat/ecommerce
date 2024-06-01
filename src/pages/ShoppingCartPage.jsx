@@ -127,7 +127,7 @@ const ShoppingCartPage = () => {
                             </div>
                             {isEligibleForFreeShipping && (
                                 <div className="flex justify-between py-2 text-green-600">
-                                    <span>150 TL ve Üzeri <br />Kargo Bedava br(Satıcı Karşılar)</span>
+                                    <span>(Satıcı Karşılar)</span>
                                     <span>-{shippingFee.toFixed(2)} TL</span>
                                 </div>
                             )}
