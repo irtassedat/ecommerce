@@ -1,31 +1,41 @@
-import { TOGGLE_PRODUCT_CHECKED } from '../reducers/shoppingCartReducer';
+// src/store/actions/shoppingCartAction.js
 import axiosInstance from '../../mock/axiosInstance';
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
-    SET_ADDRESS,
-    SET_CART_LIST,
-    SET_PAYMENT,
-  } from "../reducers/shoppingCartReducer";
-  
-  // Sepetteki ürün listesini ayarlamak için
-  export const setCartListAction = (cartList) => {
-    return { type: SET_CART_LIST, payload: cartList };
+  SET_ADDRESS,
+  SET_CART_LIST,
+  SET_PAYMENT,
+  ADD_CARD_SUCCESS,
+  FETCH_CARDS_SUCCESS,
+  UPDATE_CARD_SUCCESS,
+  DELETE_CARD_SUCCESS,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_FAILURE,
+  FETCH_CART_DETAILS_SUCCESS,
+  RESET_CART
+} from '../actionTypes';
+
+// Sepetteki ürün listesini ayarlamak için
+export const setCartListAction = (cartList) => {
+  return { type: SET_CART_LIST, payload: cartList };
+};
+
+// Ödeme bilgisini ayarlamak için
+export const setPaymentAction = (payment) => {
+  return { type: SET_PAYMENT, payload: payment };
+};
+
+// Adres bilgisini ayarlamak için
+export const setAddressAction = (address) => {
+  return { type: SET_ADDRESS, payload: address };
+};
+
+export const addToCart = (product) => {
+  return {
+    type: 'ADD_TO_CART',
+    payload: product
   };
-  
-  // Ödeme bilgisini ayarlamak için
-  export const setPaymentAction = (payment) => {
-    return { type: SET_PAYMENT, payload: payment };
-  };
-  
-  // Adres bilgisini ayarlamak için
-  export const setAddressAction = (address) => {
-    return { type: SET_ADDRESS, payload: address };
-  };
-  export const addToCart = (product) => {
-    return {
-        type: 'ADD_TO_CART',
-        payload: product
-    };
 };
 
 export const fetchAddresses = () => async (dispatch) => {
@@ -41,7 +51,6 @@ export const fetchAddresses = () => async (dispatch) => {
     dispatch({ type: 'FETCH_ADDRESSES_ERROR', payload: error.response });
   }
 };
-
 
 // Yeni adres ekleme
 export const addAddress = (addressData) => async (dispatch) => {
@@ -59,7 +68,6 @@ export const addAddress = (addressData) => async (dispatch) => {
   }
 };
 
-
 // Adres güncelleme
 export const updateAddress = (addressId, addressData) => async (dispatch) => {
   try {
@@ -76,7 +84,6 @@ export const updateAddress = (addressId, addressData) => async (dispatch) => {
   }
 };
 
-
 export const deleteAddress = (addressId) => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
@@ -92,7 +99,6 @@ export const deleteAddress = (addressId) => async (dispatch) => {
   }
 };
 
-
 // Yeni adres ekleme işlemi başarılı olduktan sonra adres listesini yeniden fetch eden işlem
 export const addAddressAndUpdateList = (addressData) => async (dispatch) => {
   try {
@@ -103,12 +109,11 @@ export const addAddressAndUpdateList = (addressData) => async (dispatch) => {
   }
 };
 
-
 export const incrementProductCount = (productId) => {
-    return {
-        type: 'INCREMENT_PRODUCT_COUNT',
-        payload: productId
-    };
+  return {
+    type: 'INCREMENT_PRODUCT_COUNT',
+    payload: productId
+  };
 };
 
 export const decrementProductCount = (productId) => (dispatch, getState) => {
@@ -117,27 +122,27 @@ export const decrementProductCount = (productId) => (dispatch, getState) => {
   
   // Ürün sayısı 1'den büyükse, sayıyı azalt
   if (product && product.count > 1) {
-      dispatch({
-          type: 'DECREMENT_PRODUCT_COUNT',
-          payload: productId
-      });
+    dispatch({
+      type: 'DECREMENT_PRODUCT_COUNT',
+      payload: productId
+    });
   } else {
-      alert('Ürün sayısı 1’den az olamaz.');
+    alert('Ürün sayısı 1’den az olamaz.');
   }
 };
 
 export const removeFromCart = (productId) => {
-    return {
-        type: 'REMOVE_FROM_CART',
-        payload: productId
-    };
+  return {
+    type: 'REMOVE_FROM_CART',
+    payload: productId
+  };
 };
   
 // Ürün seçimini değiştirmek için action
 export const toggleProductChecked = (productId) => {
   return {
-      type: TOGGLE_PRODUCT_CHECKED,
-      payload: productId
+    type: TOGGLE_PRODUCT_CHECKED,
+    payload: productId
   };
 };
 
@@ -145,3 +150,85 @@ export const confirmCart = (cartDetails) => ({
   type: 'CONFIRM_CART',
   payload: cartDetails,
 });
+
+export const fetchCards = () => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token'); // Token'ı localStorage'dan al
+    const response = await axiosInstance.get('/user/card', {
+      headers: {
+        Authorization: token  // Her istek için token'ı ekleyin
+      },
+    });
+    console.log("API'den gelen kartlar:", response.data);  // API yanıtını konsola yazdır
+    dispatch({ type: FETCH_CARDS_SUCCESS, payload: response.data });
+    toast.success("Kartlar başarıyla yüklendi.");
+  } catch (error) {
+    console.error("Kartları yüklerken hata oluştu", error);
+    toast.error("Kartları yüklerken bir hata oluştu.");
+  }
+};
+
+// Kart ekleme örneği
+export const addCard = (cardData) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.post('/user/card', cardData, {
+      headers: { Authorization: token }
+    });
+    dispatch({ type: ADD_CARD_SUCCESS, payload: response.data });
+    dispatch(fetchCards());  // Eklendikten sonra kart listesini yeniden çek
+    toast.success("Kart başarıyla eklendi.");
+  } catch (error) {
+    console.error("Kart eklerken hata oluştu", error);
+    toast.error("Kart eklenirken bir hata oluştu.");
+  }
+};
+
+export const updateCard = (cardId, cardData) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.put('/user/card', { ...cardData, id: cardId }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    dispatch({ type: UPDATE_CARD_SUCCESS, payload: response.data });
+    dispatch(fetchCards());  // Güncellendikten sonra kart listesini yeniden çek
+    toast.success('Kart başarıyla güncellendi.');
+  } catch (error) {
+    toast.error('Kart güncellenirken bir hata oluştu.');
+  }
+};
+
+export const deleteCard = (cardId) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.delete(`/user/card/${cardId}`, {
+      headers: { Authorization: token }
+    });
+    dispatch({ type: DELETE_CARD_SUCCESS, payload: cardId });
+    dispatch(fetchCards());  // Silindikten sonra kart listesini yeniden çek
+    toast.success("Kart başarıyla silindi.");
+  } catch (error) {
+    console.error("Kart silerken hata oluştu", error);
+    toast.error("Kart silinirken bir hata oluştu.");
+  }
+};
+
+export const createOrder = (orderData) => async (dispatch) => {
+  try {
+    console.log('API çağrısı başlıyor', orderData);
+    const token = localStorage.getItem('token');
+    const response = await axiosInstance.post('/order', orderData, {
+      headers: { Authorization: token }
+    });
+    console.log('API çağrısı başarılı', response.data);
+    dispatch({ type: CREATE_ORDER_SUCCESS, payload: response.data });
+    alert("Sipariş başarıyla oluşturuldu. Tebrikler!");
+  } catch (error) {
+    console.error("Sipariş oluşturulurken hata oluştu", error);
+    dispatch({ type: CREATE_ORDER_FAILURE, payload: error });
+    alert("Sipariş oluşturulurken bir hata oluştu.");
+  }
+};
+
+export const resetCart = () => {
+  return { type: RESET_CART };
+};

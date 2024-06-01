@@ -1,41 +1,47 @@
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
+import { Link } from "react-router-dom";
 import Rating from '@mui/material/Rating';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ProductDetails from "../components/productpage/ProductDetails";
 import { bestseller } from "../mock/bestSellerData";
-import ProductCardSecond from "../components/productpage/ProductCardSecond";
+import ProductCard from "../components/productlist/ProductCard";
 import Clients from "../components/aboutpage/Clients";
 import React, { useEffect, useState } from 'react';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { faCartShopping, faEye } from '@fortawesome/free-solid-svg-icons';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../mock/axiosInstance';
-import Carousel from '../pages/carousel.component.jsx'
+import Carousel from '../pages/carousel.component.jsx';
 
 const colors = ["23A6F0", "2DC071", "E77C40", "252B42"];
-
-
 
 export default function ProductPage() {
     const [currIndex, setCurrIndex] = React.useState(0);
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
+    const [products, setProducts] = useState([]); // Ürünlerin listesini tutacak state
 
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
                 const response = await axiosInstance.get(`/products/${productId}`);
-                // API'den gelen ürünü state'e kaydet
                 setProduct(response.data);
             } catch (error) {
                 console.error('Ürün detayları çekilirken bir hata oluştu:', error);
             }
         };
-    
-        fetchProductDetails();
-    }, [productId]);
 
-    
+        const fetchProducts = async () => {
+            try {
+                const response = await axiosInstance.get('/products');
+                setProducts(response.data);
+            } catch (error) {
+                console.error('Ürünler çekilirken bir hata oluştu:', error);
+            }
+        };
+
+        fetchProductDetails();
+        fetchProducts();
+    }, [productId]);
 
     if (!product) {
         return <p>Ürün yükleniyor...</p>;
@@ -43,8 +49,6 @@ export default function ProductPage() {
 
     const productImageUrls = product.images.map(img => img.url);
     const repeatedImageUrls = [...productImageUrls, ...productImageUrls];
-
-
 
     return (
         <>
@@ -59,10 +63,9 @@ export default function ProductPage() {
                 <div className="max-w-[1050px] mx-auto flex gap-[30px] pb-12">
                     <div>
                         <div className="w-[506px] h-[450px]">
-                             <Carousel slides={repeatedImageUrls} />
+                            <Carousel slides={repeatedImageUrls} />
                         </div>
                         <div className="flex gap-[19px] pt-5">
-                            {/* Carousel altında küçük resim navigasyonu */}
                             {productImageUrls.slice(0, 2).map((url, index) => (
                                 <button
                                     key={index}
@@ -71,7 +74,7 @@ export default function ProductPage() {
                                 >
                                     <img src={url} alt={`Thumbnail ${index}`} className="w-full h-full object-cover" />
                                 </button>
-                            ))}  
+                            ))}
                         </div>
                     </div>
 
@@ -87,9 +90,9 @@ export default function ProductPage() {
                         <p className="text-[#737373] text-sm leading-5 max-w-[455px]">{product.description}</p>
                         <hr />
                         <div className="flex gap-2.5">
-                            {colors.map((item, index) => {
-                                return <div key={index} className={`bg-[#${item}] w-[30px] h-[30px] rounded-full`}></div>
-                            })}
+                            {colors.map((item, index) => (
+                                <div key={index} className={`bg-[#${item}] w-[30px] h-[30px] rounded-full`}></div>
+                            ))}
                         </div>
                         <div className="flex flex-wrap gap-2.5">
                             <div>
@@ -102,7 +105,6 @@ export default function ProductPage() {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
             <ProductDetails />
@@ -112,9 +114,9 @@ export default function ProductPage() {
                     <h3 className="self-stretch pt-12 pb-6">BESTSELLER PRODUCTS</h3>
                     <hr className="h-[4px] border-0 mb-6 bg-[#ECECEC] self-stretch" />
                     <div className="flex flex-wrap justify-between gap-y-6 pb-12">
-                        {bestseller.map((item, index) => {
-                            return <ProductCardSecond key={index} data={item} />
-                        })}
+                        {bestseller.map((item, index) => (
+                            <ProductCard key={index} data={item} size={[300, 200]} />
+                        ))}
                     </div>
                 </div>
             </section>

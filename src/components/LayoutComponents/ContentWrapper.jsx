@@ -9,6 +9,8 @@ import SignUpForm from "../../pages/SignupPage";
 import LoginForm from "../../pages/LoginFormPage";
 import ShoppingCartPage from "../../pages/ShoppingCartPage";
 import CreateOrderPage from "../../pages/CreateOrderPage";
+import PreviousOrdersPage from "../../pages/PreviousOrderPage";
+import ProtectedRoute from "../../components/previousorderspage/ProtectedRoute";
 
 export default function ContentWrapper() {
   return (
@@ -35,7 +37,7 @@ export default function ContentWrapper() {
         <SignUpForm />
       </Route>
       <Route path="/login">
-        <LoginForm /> {}
+        <LoginForm />
       </Route>
       <Route path="/shop/:category">
         <ProductListPage />
@@ -43,9 +45,12 @@ export default function ContentWrapper() {
       <Route path="/shopping-cart">
         <ShoppingCartPage />
       </Route>
-      <Route path="/create-order">
+      <ProtectedRoute path="/create-order"> 
         <CreateOrderPage />
-      </Route>
+      </ProtectedRoute>
+      <ProtectedRoute path="/previous-orders">
+        <PreviousOrdersPage />
+      </ProtectedRoute>
     </Switch>
   );
 }

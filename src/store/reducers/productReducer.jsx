@@ -19,6 +19,7 @@ const initialState = {
   fetchState: FETCH_STATES.NotFetched,
 };
 
+
 export const productReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_PRODUCT:
@@ -31,6 +32,10 @@ export const productReducer = (state = initialState, action) => {
       return { ...state, activePage: action.payload };
     case CHANGE_FETCHSTAT:
       return { ...state, fetchState: action.payload };
+    case 'products/fetchById/fulfilled':
+      return { ...state, currentProduct: action.payload };
+    case 'products/fetchById/rejected':
+      return { ...state, currentProduct: null, fetchState: FETCH_STATES.FetchFailed };
     default:
       return state;
   }

@@ -1,29 +1,37 @@
-export const SET_CART_LIST = "SET_CART_LIST";
-export const SET_PAYMENT = "SET_PAYMENT";
-export const SET_ADDRESS = "SET_ADDRESS";
-export const ADD_TO_CART = 'ADD_TO_CART';
-export const INCREMENT_PRODUCT_COUNT = 'INCREMENT_PRODUCT_COUNT';
-export const DECREMENT_PRODUCT_COUNT = 'DECREMENT_PRODUCT_COUNT';
-export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
-export const TOGGLE_PRODUCT_CHECKED = 'TOGGLE_PRODUCT_CHECKED';
-export const FETCH_ADDRESSES_SUCCESS = "FETCH_ADDRESSES_SUCCESS";
-export const ADD_ADDRESS_SUCCESS = "ADD_ADDRESS_SUCCESS";
-export const UPDATE_ADDRESS_SUCCESS = "UPDATE_ADDRESS_SUCCESS";
-export const FETCH_PROVINCES_SUCCESS = "FETCH_PROVINCES_SUCCESS";
-export const FETCH_DISTRICTS_SUCCESS = "FETCH_DISTRICTS_SUCCESS";
-export const FETCH_NEIGHBORHOODS_SUCCESS = "FETCH_NEIGHBORHOODS_SUCCESS";
-export const DELETE_ADDRESS_SUCCESS = "DELETE_ADDRESS_SUCCESS";
-
+// src/store/reducers/shoppingCartReducer.js
+import {
+  SET_CART_LIST,
+  SET_PAYMENT,
+  SET_ADDRESS,
+  ADD_TO_CART,
+  INCREMENT_PRODUCT_COUNT,
+  DECREMENT_PRODUCT_COUNT,
+  REMOVE_FROM_CART,
+  TOGGLE_PRODUCT_CHECKED,
+  FETCH_ADDRESSES_SUCCESS,
+  ADD_ADDRESS_SUCCESS,
+  UPDATE_ADDRESS_SUCCESS,
+  DELETE_ADDRESS_SUCCESS,
+  FETCH_CARDS_SUCCESS,
+  ADD_CARD_SUCCESS,
+  UPDATE_CARD_SUCCESS,
+  DELETE_CARD_SUCCESS,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_FAILURE,
+  FETCH_CART_DETAILS_SUCCESS,
+  RESET_CART
+} from '../actionTypes';
 
 const initialState = {
   cartList: [], // Alışveriş sepetindeki ürünler
   payment: {}, // Ödeme bilgisi
   addressList: [], // Kullanıcının kaydedilmiş adresleri
   currentAddress: {}, // Seçili veya yeni eklenen adres
-  cartDetails: {}, // 
+  cartDetails: {}, // Sepet detayları
   provinces: [],
   districts: [],
   neighborhoods: [],
+  cardList: [], // Kullanıcının kaydedilmiş kartları
 };
 
 export const shoppingCartReducer = (state = initialState, action) => {
@@ -106,7 +114,43 @@ export const shoppingCartReducer = (state = initialState, action) => {
         ...state,
         addressList: state.addressList.filter(address => address.id !== action.payload),
         currentAddress: isCurrentAddressDeleted ? {} : state.currentAddress,
-      };      
+      };
+    case FETCH_CARDS_SUCCESS:
+      return { ...state, cardList: action.payload };
+    case ADD_CARD_SUCCESS:
+      return { ...state, cardList: [...state.cardList, action.payload] };
+    case UPDATE_CARD_SUCCESS:
+      const updatedCardList = state.cardList.map(card =>
+        card.id === action.payload.id ? action.payload : card
+      );
+      return { ...state, cardList: updatedCardList };
+    case DELETE_CARD_SUCCESS:
+      return {
+        ...state,
+        cardList: state.cardList.filter(card => card.id !== action.payload),
+      };  
+    case CREATE_ORDER_SUCCESS:
+      return {
+        ...state,
+        cartList: [],
+        payment: {},
+        currentAddress: {},
+        cartDetails: {},
+      };
+    case CREATE_ORDER_FAILURE:
+      return {
+        ...state,
+      };
+    case RESET_CART:
+      return {
+        ...state,
+        cartList: [],
+        payment: {},
+        currentAddress: {},
+        cartDetails: {},
+      };
+    case FETCH_CART_DETAILS_SUCCESS:
+      return { ...state, cartDetails: action.payload };
     default:
       return state;
   }
