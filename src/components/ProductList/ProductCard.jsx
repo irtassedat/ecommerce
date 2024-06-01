@@ -1,47 +1,58 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../../store/actions/shoppingCartAction'; // Yolunuz projenize göre değişebilir
+import { addToCart } from '../../store/actions/shoppingCartAction';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart, faCartShopping, faEye, faStar, faMoneyBill } from '@fortawesome/free-solid-svg-icons';
 
-export default function ProductCard({ data, size }) {
+const ProductCard = ({ data, size }) => {
     const dispatch = useDispatch();
     const imageSizeStyle = {
         width: size[0] + 'px',
         height: size[1] + 'px',
     };
 
-    // Ürün adından slug oluşturun (basit bir örnek)
-    const productNameSlug = data.name.replace(/\s+/g, '-').toLowerCase();
+    // Ensure data properties are defined
+    const productNameSlug = data.name ? data.name.replace(/\s+/g, '-').toLowerCase() : '';
+    const productImageUrl = data.images && data.images.length > 0 ? data.images[0].url : '';
 
     // Sepete ekle butonu için event handler
     const handleAddToCart = () => {
-        dispatch(addToCart(data)); // Sepete ekleme action'ı
+        dispatch(addToCart(data));
     };
 
     return (
-        <div className="product-card flex flex-col items-center no-underline">
-            <Link to={`/${data.category_id}/${data.id}/${productNameSlug}`} className="flex flex-col items-center no-underline">
-                <img src={data.images[0].url} alt={data.name} style={imageSizeStyle} className="object-cover object-center" />
-                <div className="flex flex-col items-center gap-2.5 pt-6 pb-7">
-                    <h4 className="text-[#252B42] text-base font-bold leading-6">{data.name}</h4>
-                    <p className="text-[#737373] text-sm font-bold leading-6">{data.description}</p>
-                    <div className="flex gap-1.5">
-                        <p className="text-[#737373] text-base font-bold leading-6">${data.price}</p>
-                        {/* İndirimli fiyat ve renk seçenekleri burada olabilir */}
-                        {/* <p className="text-[#23856D] text-base font-bold leading-6">$5</p> */}
-                        {/* Renk seçenekleri varsa gösterilecek kısım */}
-                        {/* <div className="flex gap-1.5">
-                            {data.colorOptions.map((item, index) => {
-                                return <div key={index} className={`h-4 w-4 rounded-full ${item}`}></div>
-                            })}
-                        </div> */}
+        <div className="max-w-sm mx-auto bg-white dark:bg-zinc-800 rounded-xl shadow-md overflow-hidden md:max-w-2xl transform transition-transform duration-300 hover:scale-105 relative">
+            <div className="relative">
+                <img className="w-full h-48 object-cover" src={productImageUrl} alt={data.name} style={imageSizeStyle} />
+                <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">Sale</span>
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                    <button className="bg-white dark:bg-zinc-700 p-2 rounded-full shadow-md opacity-75 hover:opacity-100" onClick={handleAddToCart}>
+                        <FontAwesomeIcon icon={faHeart} />
+                    </button>
+                    <Link to={`/${data.category_id}/${data.id}/${productNameSlug}`} className="bg-white dark:bg-zinc-700 p-2 rounded-full shadow-md opacity-75 hover:opacity-100">
+                        <FontAwesomeIcon icon={faEye} />
+                    </Link>
+                </div>
+            </div>
+            <div className="p-4">
+                <div className="text-blue-500 dark:text-blue-300 text-sm font-semibold">{data.category}</div>
+                <div className="flex items-center justify-between">
+                    <Link to={`/${data.category_id}/${data.id}/${productNameSlug}`} className="text-lg font-bold text-zinc-900 dark:text-gray-300">{data.name}</Link>
+                    <div className="flex items-center">
+                        <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+                        <span className="ml-1 text-sm text-zinc-600 dark:text-zinc-400">4.9</span>
                     </div>
                 </div>
-            </Link>
-            {/* Sepete Ekle butonu */}
-            <button onClick={handleAddToCart} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Sepete Ekle
-            </button>
+                <p className="text-zinc-600 dark:text-zinc-400 mt-2">{data.description}</p>
+                <div className="flex items-center mt-4">
+                    <FontAwesomeIcon icon={faMoneyBill} className="text-green-500" />
+                    <span className="ml-2 text-sm text-zinc-600 dark:text-zinc-400">41 Sales</span>
+                    <span className="ml-2 text-green-500 dark:text-orange-400 font-semibold">${data.price}</span>
+                </div>
+            </div>
         </div>
     );
-}
+};
+
+export default ProductCard;
