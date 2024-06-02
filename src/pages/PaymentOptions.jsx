@@ -3,9 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchCards, addCard, updateCard, deleteCard, setPaymentAction } from '../store/actions/shoppingCartAction';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
 
 const PaymentOptions = () => {
   const cards = useSelector(state => state.shoppingCart.cardList);
+  const grandTotal = useSelector(state => state.shoppingCart.cartDetails?.grandTotal) || 0; // Default to 0 if grandTotal is undefined
   const dispatch = useDispatch();
   const [showAddCardForm, setShowAddCardForm] = useState(false);
   const [newCard, setNewCard] = useState({
@@ -25,6 +27,18 @@ const PaymentOptions = () => {
 
   const handleAddCard = async (e) => {
     e.preventDefault();
+    if (newCard.card_no.length !== 16) {
+      toast.error("Kart numarası 16 haneli olmalıdır.");
+      return;
+    }
+    if (!newCard.name_on_card) {
+      toast.error("Kart sahibi adı boş olamaz.");
+      return;
+    }
+    if (newCard.expire_month.length !== 2 || newCard.expire_year.length !== 2) {
+      toast.error("Son kullanma tarihi iki haneli olmalıdır.");
+      return;
+    }
     const { cvv, ...cardData } = newCard; // Exclude CVV from the data to be submitted
     await dispatch(addCard(cardData));
     setNewCard({ card_no: '', expire_month: '', expire_year: '', name_on_card: '', cvv: '' });
@@ -42,6 +56,18 @@ const PaymentOptions = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (newCard.card_no.length !== 16) {
+      toast.error("Kart numarası 16 haneli olmalıdır.");
+      return;
+    }
+    if (!newCard.name_on_card) {
+      toast.error("Kart sahibi adı boş olamaz.");
+      return;
+    }
+    if (newCard.expire_month.length !== 2 || newCard.expire_year.length !== 2) {
+      toast.error("Son kullanma tarihi iki haneli olmalıdır.");
+      return;
+    }
     const { cvv, ...cardData } = newCard; // Exclude CVV from the data to be submitted
     if (editMode) {
       await dispatch(updateCard(editCardId, cardData));
@@ -67,12 +93,12 @@ const PaymentOptions = () => {
 
   return (
     <div className="bg-white dark:bg-zinc-900 py-12 px-8 rounded-lg shadow relative z-20 flex flex-col justify-center">
-      <div className="flex items-center mb-4 mt-4">
+      <div className="flex items-center mb-4 mt-4 pl-4">
         <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
           <img src="https://placehold.co/24x24" alt="check" />
         </div>
         <div className="ml-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Kart ile Öde</h2>
+          <h2 className="text-lg font-semibold dark:text-black-100 ">Kart ile Öde</h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Kart ile ödemeyi seçtiniz. Banka veya Kredi Kartı kullanarak ödemenizi güvenle yapabilirsiniz.
           </p>
@@ -81,7 +107,7 @@ const PaymentOptions = () => {
       <div className="border-b border-zinc-300 dark:border-zinc-700 my-4"></div> {/* Çizgi ekleniyor */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
         <div className="flex flex-col">
-          <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Kart Bilgileri</h3>
+          <h3 className="text-lg font-semibold text-black-100 mb-4">Kart Bilgileri</h3>
           {cards.map(card => (
             <div
               key={card.id}
@@ -99,7 +125,7 @@ const PaymentOptions = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-orange-400 to-red-400 p-4 rounded-lg text-xs mt-2">
+              <div className="bg-gradient-to-r from-gray-300 to-blue-300 p-4 rounded-lg text-xs mt-2">
                 <div className="text-white">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-bold">MyPay</span>
@@ -128,23 +154,23 @@ const PaymentOptions = () => {
         <div className="relative"> {/* Relative position ekleniyor */}
           <div className="border-l border-zinc-300 dark:border-zinc-700 absolute left-0 top-0 bottom-0 ml-2"></div> {/* Dikey çizgi ekleniyor */}
           <div className="pl-8"> {/* Dikey çizgi ile aradaki boşluk ayarlanıyor */}
-            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Taksit Seçenekleri</h3>
+            <h3 className="text-lg font-semibold text-black-100 mb-4">Taksit Seçenekleri</h3>
             <p className="text-zinc-600 dark:text-zinc-400 mb-4">Kartınıza uygun taksit seçeneğini seçiniz</p>
             <div className="border rounded-lg p-4">
               <div className="flex items-center mb-4">
                 <input type="radio" name="installment" className="mr-2" />
-                <span className="text-zinc-800 dark:text-zinc-200">Tek Çekim</span>
-                <span className="text-orange-500 ml-auto">6.604,22 TL</span>
+                <span className="text-black-100">Tek Çekim</span>
+                <span className="text-orange-500 ml-auto">{grandTotal.toFixed(2)} TL</span>
               </div>
               <div className="flex items-center mb-4">
                 <input type="radio" name="installment" className="mr-2" />
-                <span className="text-zinc-800 dark:text-zinc-200">İki Taksit</span>
-                <span className="text-orange-500 ml-auto">3.302,11 TL</span>
+                <span className="text-black-100">İki Taksit</span>
+                <span className="text-orange-500 ml-auto">{(grandTotal / 2).toFixed(2)} TL</span>
               </div>
               <div className="flex items-center mb-4">
                 <input type="radio" name="installment" className="mr-2" />
-                <span className="text-zinc-800 dark:text-zinc-200">Üç Taksit</span>
-                <span className="text-orange-500 ml-auto">2.201,41 TL</span>
+                <span className="text-black-100">Üç Taksit</span>
+                <span className="text-orange-500 ml-auto">{(grandTotal / 3).toFixed(2)} TL</span>
               </div>
             </div>
           </div>
@@ -153,16 +179,16 @@ const PaymentOptions = () => {
       <div className="border-t border-zinc-300 dark:border-zinc-700 my-4"></div> {/* Çizgi ekleniyor */}
       {showAddCardForm && (
         <div className="fixed inset-0 flex items-center justify-center z-20">
-          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="fixed inset-0 bg-black opacity-50" onClick={() => setShowAddCardForm(false)}></div>
           <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6 w-full max-w-md relative">
             <button className="absolute top-2 right-2 text-zinc-400 dark:text-zinc-300" onClick={() => setShowAddCardForm(false)}>
               &times;
             </button>
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{editMode ? 'Edit Card' : 'Add Card'}</h1>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{editMode ? 'Kartı Düzenle' : 'Kart Ekle'}</h1>
             </div>
-            <p className="text-zinc-500 dark:text-zinc-400 mb-6">{editMode ? 'Edit your debit/credit card' : 'Add your debit/credit card'}</p>
-            <div className="bg-gradient-to-r from-orange-400 to-red-400 p-4 rounded-lg mb-6">
+            <p className="text-zinc-500 dark:text-zinc-400 mb-6">{editMode ? 'Kart bilgilerinizi düzenleyin' : 'Kart bilgilerinizi ekleyin'}</p>
+            <div className="bg-gradient-to-r from-gray-300 to-blue-300 p-4 rounded-lg mb-6">
               <div className="text-white">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-bold">MyPay</span>
@@ -172,55 +198,59 @@ const PaymentOptions = () => {
                   {newCard.card_no ? `**** **** **** ${newCard.card_no.slice(-4)}` : 'XXXX XXXX XXXX XXXX'}
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span>{newCard.name_on_card || 'Cardholder Name'}</span>
-                  <span>Valid Thru {newCard.expire_month ? newCard.expire_month.toString().padStart(2, '0') : 'MM'}/{newCard.expire_year ? newCard.expire_year.toString().slice(-2) : 'YY'}</span>
+                  <span>{newCard.name_on_card || 'Kart Sahibinin Adı'}</span>
+                  <span>Son Kullanma {newCard.expire_month ? newCard.expire_month.toString().padStart(2, '0') : 'AA'}/{newCard.expire_year ? newCard.expire_year.toString().slice(-2) : 'YY'}</span>
                 </div>
               </div>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Card number</label>
+                <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Kart Numarası</label>
                 <input
                   type="text"
                   name="card_no"
                   value={newCard.card_no}
                   onChange={handleInputChange}
-                  placeholder="Card number"
+                  placeholder="Kart Numarası"
                   className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                  maxLength="16"
                 />
               </div>
               <div>
-                <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Cardholder name</label>
+                <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Kart Sahibi Adı</label>
                 <input
                   type="text"
                   name="name_on_card"
                   value={newCard.name_on_card}
                   onChange={handleInputChange}
-                  placeholder="Cardholder name"
+                  placeholder="Kart Sahibi Adı"
                   className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                  maxLength="30"
                 />
               </div>
               <div className="flex space-x-4">
                 <div className="flex-1">
-                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Expiration Date</label>
+                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Ay</label>
                   <input
                     type="text"
                     name="expire_month"
                     value={newCard.expire_month}
                     onChange={handleInputChange}
-                    placeholder="MM"
+                    placeholder="AA"
                     className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                    maxLength="2"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Expiration Year</label>
+                  <label className="block text-zinc-700 dark:text-zinc-300 mb-1">Yıl</label>
                   <input
                     type="text"
                     name="expire_year"
                     value={newCard.expire_year}
                     onChange={handleInputChange}
-                    placeholder="YYYY"
+                    placeholder="YY"
                     className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg p-2"
+                    maxLength="2"
                   />
                 </div>
                 <div className="flex-1">
@@ -237,7 +267,7 @@ const PaymentOptions = () => {
                 </div>
               </div>
               <button type="submit" className="mt-6 w-full bg-[#2A7CC7] hover:bg-indigo-600 text-white font-bold py-3 text-sm uppercase rounded-lg">
-                {editMode ? 'Update' : 'Next'}
+                {editMode ? 'Güncelle' : 'İleri'}
               </button>
             </form>
           </div>
