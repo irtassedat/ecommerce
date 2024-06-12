@@ -1,4 +1,3 @@
-// src/store/actions/shoppingCartAction.js
 import axiosInstance from '../../mock/axiosInstance';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,12 +12,26 @@ import {
   CREATE_ORDER_SUCCESS,
   CREATE_ORDER_FAILURE,
   FETCH_CART_DETAILS_SUCCESS,
-  RESET_CART
+  RESET_CART,
+  ADD_TO_FAVORITES,
+  REMOVE_FROM_FAVORITES,
+  SET_CART_ITEMS,
+  SET_FAVORITE_ITEMS
 } from '../actionTypes';
 
 // Sepetteki ürün listesini ayarlamak için
 export const setCartListAction = (cartList) => {
   return { type: SET_CART_LIST, payload: cartList };
+};
+
+// Sepetteki ürün listesini localStorage'dan yüklemek için
+export const setCartItems = (cartItems) => {
+  return { type: SET_CART_ITEMS, payload: cartItems };
+};
+
+// Favori ürün listesini localStorage'dan yüklemek için
+export const setFavoriteItems = (favoriteItems) => {
+  return { type: SET_FAVORITE_ITEMS, payload: favoriteItems };
 };
 
 // Ödeme bilgisini ayarlamak için
@@ -35,6 +48,20 @@ export const addToCart = (product) => {
   return {
     type: 'ADD_TO_CART',
     payload: product
+  };
+};
+
+export const addToFavorites = (product) => {
+  return {
+    type: ADD_TO_FAVORITES,
+    payload: product
+  };
+};
+
+export const removeFromFavorites = (productId) => {
+  return {
+    type: REMOVE_FROM_FAVORITES,
+    payload: productId
   };
 };
 
@@ -137,7 +164,7 @@ export const removeFromCart = (productId) => {
     payload: productId
   };
 };
-  
+
 // Ürün seçimini değiştirmek için action
 export const toggleProductChecked = (productId) => {
   return {

@@ -1,4 +1,3 @@
-// src/store/reducers/shoppingCartReducer.js
 import {
   SET_CART_LIST,
   SET_PAYMENT,
@@ -19,7 +18,11 @@ import {
   CREATE_ORDER_SUCCESS,
   CREATE_ORDER_FAILURE,
   FETCH_CART_DETAILS_SUCCESS,
-  RESET_CART
+  RESET_CART,
+  ADD_TO_FAVORITES,
+  REMOVE_FROM_FAVORITES,
+  SET_CART_ITEMS,
+  SET_FAVORITE_ITEMS
 } from '../actionTypes';
 
 const initialState = {
@@ -32,12 +35,17 @@ const initialState = {
   districts: [],
   neighborhoods: [],
   cardList: [], // Kullanıcının kaydedilmiş kartları
+  favoritesList: [], // Kullanıcının favori ürünleri
 };
 
 export const shoppingCartReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_CART_LIST:
       return { ...state, cartList: action.payload };
+    case SET_CART_ITEMS:
+      return { ...state, cartList: action.payload };
+    case SET_FAVORITE_ITEMS:
+      return { ...state, favoritesList: action.payload };
     case SET_PAYMENT:
       return { ...state, payment: action.payload };
     case SET_ADDRESS:
@@ -58,7 +66,6 @@ export const shoppingCartReducer = (state = initialState, action) => {
       const updatedCurrentAddress = state.currentAddress.id === action.payload.id ? action.payload : state.currentAddress;
       return { ...state, addressList: updatedAddressList, currentAddress: updatedCurrentAddress }; 
     case ADD_TO_CART:
-      // Sepete ürün ekleme veya var olan ürünün sayısını artırma
       const productExists = state.cartList.find(item => item.product.id === action.payload.id);
       if (productExists) {
         return {
@@ -74,7 +81,6 @@ export const shoppingCartReducer = (state = initialState, action) => {
         };
       }
     case INCREMENT_PRODUCT_COUNT:
-      // Sepetteki ürün sayısını artırma
       return {
         ...state,
         cartList: state.cartList.map(item =>
@@ -82,7 +88,6 @@ export const shoppingCartReducer = (state = initialState, action) => {
         )
       };
     case DECREMENT_PRODUCT_COUNT:
-      // Sepetteki ürün sayısını azaltma, sayı 1 ise kaldırma
       return {
         ...state,
         cartList: state.cartList.map(item => {
@@ -93,13 +98,11 @@ export const shoppingCartReducer = (state = initialState, action) => {
         }).filter(item => item != null)
       };
     case REMOVE_FROM_CART:
-      // Ürünü sepetten kaldırma
       return {
         ...state,
         cartList: state.cartList.filter(item => item.product.id !== action.payload)
       };
     case TOGGLE_PRODUCT_CHECKED:
-      // Ürünün seçim durumunu değiştirme
       return {
         ...state,
         cartList: state.cartList.map(item =>
@@ -151,6 +154,16 @@ export const shoppingCartReducer = (state = initialState, action) => {
       };
     case FETCH_CART_DETAILS_SUCCESS:
       return { ...state, cartDetails: action.payload };
+    case ADD_TO_FAVORITES:
+      return {
+        ...state,
+        favoritesList: [...state.favoritesList, action.payload]
+      };
+    case REMOVE_FROM_FAVORITES:
+      return {
+        ...state,
+        favoritesList: state.favoritesList.filter(item => item.id !== action.payload)
+      };
     default:
       return state;
   }
