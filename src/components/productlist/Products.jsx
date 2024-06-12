@@ -1,10 +1,10 @@
-import ProductCard from "./ProductCard";
 import React, { useEffect, useState, useCallback } from 'react';
 import { fetchProducts } from "../../store/actions/productActions";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import axiosInstance from "../../mock/axiosInstance";
 import debounce from 'lodash/debounce';
+import ProductCard from "./ProductCard";
 
 export default function Products() {
     const { page } = useParams();
@@ -16,7 +16,7 @@ export default function Products() {
     const [filter, setFilter] = useState('');
     const [category, setCategory] = useState('');
     const [categories, setCategories] = useState([]);
-    const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 300), []);
+    const debouncedSearchTerm = useCallback(debounce((nextValue) => setFilter(nextValue), 30), []);
     const location = useLocation();
 
     const updateQueryParams = () => {
@@ -201,7 +201,7 @@ export default function Products() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-11">
-                    {fetchState === 'FETCHING' ? <p>Loading...</p> : productList.map((item, index) => <ProductCard key={index} data={item} size={[240, 300]} />)}
+                    {fetchState === 'FETCHING' ? <p>Loading...</p> : productList.map((item, index) => <ProductCard key={index} data={item} />)}
                 </div>
                 {renderPagination()}
             </div>
