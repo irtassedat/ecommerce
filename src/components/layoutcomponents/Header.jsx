@@ -157,7 +157,7 @@ export default function Header() {
                     <nav className='hidden md:flex gap-3 text-sm leading-6 items-center'>
                         <Link to="/">Home</Link>
                         <div className="relative" onBlur={closeDropdown}>
-                            <div onClick={toggleDropdown} className="flex items-center space-x-2 cursor-pointer">
+                            <div onClick={handleShopClick} className="flex items-center space-x-2 cursor-pointer">
                                 <span className="text-sm text-black">Shop</span>
                                 <FontAwesomeIcon icon={faCaretDown} className="text-[#23A6F0]" />
                             </div>
